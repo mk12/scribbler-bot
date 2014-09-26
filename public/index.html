@@ -4,10 +4,21 @@
 	<title>Scribbler Bot | Team 22</title>
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
+<body onload="javascript:updateStatus();">
 <body>
-	<h1>Scribbler Bot | <span>Team 22</span></h1>
+	<h1>
+		<span id="title">Scribbler Bot</span>
+		<span id="bar">|</span>
+		<span id="team">Team 22</span>
+	</h1>
 	<p id="status">driving forward</p>
-	<a id="stop" onclick="javascript:stop();">Stop</a>
+	<div id="controls">
+		<a class="button" onclick="javascript:stop();">Stop</a>
+		<a class="button">Shutdown</a>
+		<br>
+		Mode: <a class="disabled-button">Avoid</a>
+		<a class="button">Other</a></p>
+	</div>
 	<script type="text/javascript" src="script.js"></script>
 </body>
 </html>

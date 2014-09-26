@@ -7,6 +7,11 @@ from myro import *
 # Need way of accepting input when server gets it
 # Need way of sending data to the server
 
+# myro module polls scribbler bot in a loop
+# each iteration,
+# - check for messages from server
+# - 
+
 def loop():
     """."""
     pass

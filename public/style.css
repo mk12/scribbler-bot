@@ -13,9 +13,9 @@ h1 {
 	margin-bottom: 50px;
 }
 
-h1 > span {
-	color: #d55;
-}
+h1 > #title { color: #000; }
+h1 > #bar   { color: #999; }
+h1 > #team  { color: #d55; }
 
 #status {
 	width: 481px;
@@ -27,8 +27,8 @@ h1 > span {
 	font-family: "Courier New";
 }
 
-#stop {
-	font-size: 25pt;
+#controls a {
+	font-size: 22pt;
 	border: 1px solid #aaa;
 	padding: 10px;
 	background: #fff;
@@ -38,12 +38,25 @@ h1 > span {
 	cursor: pointer;
 }
 
-#stop:hover {
+#controls a:hover {
 	background: #000;
+	border-color: #000;
 	color: #fff;
-	border: none;
 }
 
-#stop:active {
+#controls a:active {
 	background: #d55;
+}
+
+#controls .disabled-button {
+	border: 1px solid #aaa;
+	color: #aaa;
+	background: #eee;
+	cursor: default;
+}
+
+#controls .disabled-button:hover {
+	border: 1px solid #aaa;
+	color: #aaa;
+	background: #eee;
 }

@@ -1,0 +1,35 @@
+{title}
+Scribbler Bot | Team 22
+
+{content}
+<textarea id="console" rows="1" readonly></textarea>
+<section id="controls">
+	<section>
+		<label>Program</label>
+		<a id="btnavoid"
+		   class="disabled-button"
+		   onclick="javascript:switchProgram('avoid');">Avoid</a>
+		<a id="btnother">Other</a>
+	</section>
+	<section>
+		<label>Control</label>
+		<a id="btnstartstop" onclick="javascript:btnStartStop();">Start</a>
+		<a id="btnreset" onclick="javascript:btnReset();">Reset</a>
+	</section>
+	<section>
+		<label>Speed</label>
+		<a id="btndec" onclick="javascript:send('dec');">Dec</a>
+		<a id="btninc" onclick="javascript:send('inc');">Inc</a>
+	</section>
+	<section>
+		<label>Other</label>
+		<a id="btnbeep" onclick="javascript:send('beep')">Beep</a>
+		<a id="btninfo" onclick="javascript:send('info')">Info</a>
+	</section>
+	<section>
+		<label>Console</label>
+		<a id="btnclear" onclick="javascript:clearConsole();">Clear</a>
+		<a id="btnfreescroll" onclick="javascript:btnFreeScroll();">Free</a>
+	</section>
+</section>
+<script src="/script.js"></script>

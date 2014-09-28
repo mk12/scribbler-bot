@@ -1,5 +1,7 @@
 body {
-	margin: 50px auto 0;
+	margin: 60px auto 0;
+	padding: 0 10px;
+	width: 485px;
 	text-align: center;
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
 		"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
@@ -17,18 +19,41 @@ h1 > #title { color: #000; }
 h1 > #bar   { color: #999; }
 h1 > #team  { color: #d55; }
 
-#status {
-	width: 481px;
+#console {
+	font-size: 20pt;
 	margin: 0 auto 50px;
 	padding: 8px 0;
 	border-top: 1px solid #000;
 	border-bottom: 1px solid #000;
+	border-left: none;
+	border-right: none;
 	background: #eee;
 	font-family: "Courier New";
+	width: 100%;
+	min-width: 100%;
+	max-width: 100%;
+	line-height: 30pt;
+}
+
+#controls {
+	display: table;
+	width: 485px;
+	border-spacing: 10px;
+}
+
+#controls > section {
+	display: table-row;
+}
+
+#controls label {
+	display: table-cell;
+	text-align: left;
 }
 
 #controls a {
-	font-size: 22pt;
+	width: 140px;
+	display: table-cell;
+	font-size: 20pt;
 	border: 1px solid #aaa;
 	padding: 10px;
 	background: #fff;

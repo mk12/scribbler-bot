@@ -4,9 +4,27 @@ Scribbler Bot is a project that we, group 22, are developing for SE 101 in 1A So
 
 [1]: http://wiki.roboteducation.org/Myro_Reference_Manual
 
-## Web front end
+## Templates
 
-All user input for the Scribbler Bot is done via a web app. The `public` folder is served by `server.py`, and we use AJAX to communicate with the server.
+The HTML files for this project (all two of them) are generated from a template, so the first thing you have to do is run that script:
+
+```
+python gen-templates.py
+```
+
+## Server
+
+Now, you must start the server:
+
+```
+python src/main.py
+```
+
+Use the `-h` flag to see what other options there are.
+
+## Client
+
+The web browser should have opened to `http://localhost:8080` automatically. You control Scribbler Bot via this web app. By clicking the buttons, you can choose a program, start/stop/reset the program, adjust the robot's speed, make it beep, display some information about the robot, clear the console, and toggle automatic scrolling of the console.
 
 ## Object avoidance
 

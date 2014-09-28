@@ -99,6 +99,7 @@ function btnReset() {
 	setStartStop(true);
 	setEnabled('btnreset', false);
 	send('control:reset');
+	running = false;
 }
 
 // Sends a message to the server and adds the response to the console.

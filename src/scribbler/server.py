@@ -2,25 +2,14 @@
 
 """Implements the server for the web application."""
 
-import webbrowser
+import gevent
 import os.path
-import sys
-import threading
-import time
-from wsgiref import simple_server
+import webbrowser
+from datetime import datetime
+from gevent import pywsgi
+from sys import exit
 
-# ============================================================ 
-#           Constants
-# ============================================================ 
-
-# Serve the website on port 8080.
-PORT = 8080
-
-# All HTML files and other resources are in the public folder.
-PUBLIC = '../public'
-
-# Requests for any files other than these will 404.
-WHITELIST = ['/', '/index.html', '/404.html', '/style.css', '/script.js']
+from scribbler.controller import Controller
 
 # Response statuses.
 STATUS_200 = '200 OK'
@@ -30,28 +19,99 @@ STATUS_404 = '404 NOT FOUND'
 MIME_PLAIN = 'text/plain'
 MIMES = {'html': 'text/html', 'css': 'text/css', 'js': 'application/javascript'}
 
-# Delay before opening the browser to give the server time to start up.
-BROWSER_DELAY = 200
+# Convential paths for important files.
+PATH_INDEX = '/index.html'
+PATH_404 = '/404.html'
 
-# ============================================================ 
-#           Paths
-# ============================================================ 
 
-def relative_path(path_info):
-    """Returns the relative path that should be followed for the request.
-    Anything not present in the whitelist will cause a 404."""
-    if path_info in WHITELIST:
-        if path_info == '/':
-            path_info = '/index.html'
-    else:
-        path_info = '/404.html'
-    return PUBLIC + path_info
+class Server(object):
+
+    """A very simple web server."""
+
+    def __init__(self, host, port, root, whitelist):
+        """Create a server that serves from root on host:port.
+
+        Only paths in the root directory that are also present in the whitelist
+        will be served. The whitelist paths are absolute, so they must begin
+        with a slash. The paths '/', '/index.html', and '/404.html' must be
+        included for the website to work properly.
+        """
+        self.httpd = pywsgi.WSGIServer((host, port), self.handle_request)
+        self.url = "http://{}:{}".format(host, port)
+        self.root = root.rstrip('/')
+        self.whitelist = whitelist
+        self.running = False
+        self.controller = Controller()
+
+    def start(self, open_browser=True, verbose=True):
+        """Starts the server if it is not already running. Unless False
+        arguments are passed, prints a message to standard output and opens the
+        browser to the served page."""
+        if self.running:
+            return
+        self.httpd.start()
+        if verbose:
+            print("Serving on {}...".format(self.url))
+        if open_browser:
+            webbrowser.open(self.url)
+        self.running = True
+
+    def stop(self):
+        """Stops the program and the server. Does nothing if already stopped."""
+        if self.running:
+            self.controller.stop()
+            self.httpd.stop()
+
+    def stay_alive(self):
+        """Prevents the program from ending by never returning. Only exits when
+        a keyboard interrupt is detected. The server must already be running."""
+        assert self.running
+        try:
+            self.httpd.serve_forever()
+        except KeyboardInterrupt:
+            exit()
+
+    def handle_request(self, env, start_response):
+        """Handles all server requests."""
+        method = env['REQUEST_METHOD']
+        if method == 'GET':
+            return self.handle_get(env['PATH_INFO'], start_response)
+        elif method == 'POST':
+            return self.handle_post(extract_data(env), start_response)
+
+    def handle_get(self, path_info, start_response):
+        """Handles a GET request, which is used for getting resources."""
+        path = self.path(path_info)
+        head = headers(get_mime(path), os.path.getsize(path))
+        start_response(get_status(path), head)
+        return open(path)
+
+    def handle_post(self, data, start_response):
+        """Handles a POST request, which is used for AJAX communication."""
+        msg = self.controller(data)
+        head = headers(get_mime(), len(msg))
+        start_response(get_status(), head)
+        yield msg
+
+    def path(self, path_info):
+        """Returns the relative path that should be followed for the request.
+        The root will go to index file. Anything not present in the server's
+        whitelist will cause a 404."""
+        if path_info in self.whitelist:
+            if path_info == '/':
+                path_info = PATH_INDEX
+        else:
+            path_info = PATH_404
+        return self.root + path_info
+
 
 def get_status(path=None):
-    """Returns the request status to use for the given path."""
-    if path == '/404.html':
+    """Returns the request status to use for the given path. Defaults to 200 if
+    no argument is passed."""
+    if path == PATH_404:
         return STATUS_404
     return STATUS_200
+
 
 def get_mime(path=None):
     """Returns the MIME type to use for the given path. Defaults to 'text/plain'
@@ -62,9 +122,6 @@ def get_mime(path=None):
     without_dot = ext[1:]
     return MIMES.get(without_dot, MIME_PLAIN)
 
-# ============================================================ 
-#           GET and POST requests
-# ============================================================ 
 
 def headers(mime, length):
     """Returns a list of HTTP headers given the MIME type and the length of the
@@ -72,68 +129,13 @@ def headers(mime, length):
     return [('Content-Type', mime),
             ('Content-Length', str(length))]
 
-def handle_get(path_info, start_response):
-    """Handles a GET request, which is used for getting resources."""
-    path = relative_path(path_info)
-    head = headers(get_mime(path), os.path.getsize(path))
-    start_response(get_status(path), head)
-    return open(path)
 
-def handle_post(data, start_response):
-    """Handles a POST request, which is used for AJAX communication."""
-    msg = "received msg: {}".format(data)
-    head = headers(get_mime(), len(msg))
-    start_response(get_status(), head)
-    # TODO: status => wait until status changes on different thread?
-    return [msg]
-
-def extract_data(environ):
-    """Extracts the data from a POST request's environment."""
+def extract_data(env):
+    """Extracts the data from the envment of a POST request."""
     try:
-        length = int(environ.get('CONTENT_LENGTH', '0'))
+        length = int(env.get('CONTENT_LENGTH', '0'))
     except ValueError:
         length = 0
     if length != 0:
-        return environ['wsgi.input'].read(length)
+        return env['wsgi.input'].read(length)
     return ""
-
-def handle_request(environ, start_response):
-    """Handles a server request for the application."""
-    method = environ['REQUEST_METHOD']
-    if method == 'GET':
-        path_info = environ['PATH_INFO']
-        return handle_get(path_info, start_response)
-    elif method == 'POST':
-        data = extract_data(environ)
-        return handle_post(data, start_response)
-
-# ============================================================ 
-#           Application
-# ============================================================ 
-
-def call_later(proc, delay):
-    """Schedules `proc`, a function of no arguments, to be executed on a daemon
-    thread after `delay` milliseconds. Returns immediately."""
-    def delayed():
-        time.sleep(delay / 1000.0)
-        proc()
-    t = threading.Thread(target=delayed)
-    t.daemon = True
-    t.start()
-
-def open_browser():
-    """Opens the web browser to the main page of the web application."""
-    webbrowser.open('http://localhost:{}'.format(PORT))
-
-def start_app():
-    """Creates the web server and serves forever on the main thread. After a
-    fixed delay, opens the web browser to the served page. Never returns. Exits
-    when a keyboard interrupt (Control-C) is detected."""
-    print("Starting the application...")
-    httpd = simple_server.make_server('localhost', PORT, handle_request)
-    print("Serving on port {}...".format(PORT))
-    call_later(open_browser, BROWSER_DELAY)
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        sys.exit('Keyboard Interrupt')

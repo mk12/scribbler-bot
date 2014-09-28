@@ -3,6 +3,8 @@
 # Copyright 2014 Mitchell Kember. Subject to the MIT License.
 
 import argparse
+import os
+import sys
 
 from scribbler.server import Server
 
@@ -37,6 +39,11 @@ parser.add_argument(
     default=8080,
     help="serve on this port"
 )
+
+# Go to this directory to make the relative paths work.
+script_dir = os.path.dirname(sys.argv[0])
+if script_dir:
+    os.chdir(script_dir)
 
 # Start the server.
 args = parser.parse_args()

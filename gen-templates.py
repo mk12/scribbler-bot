@@ -2,7 +2,8 @@
 
 # Copyright 2014 Mitchell Kember. Subject to the MIT License.
 
-from sys import exit
+import os
+import sys
 
 PAGES = ['index', '404']
 SRC_DIR = 'template/'
@@ -23,7 +24,7 @@ def build_dict(path):
         for line in f:
             if line[0] == '{' and line[-2] == '}':
                 if in_value:
-                    exit("bad format in {}", path)
+                    sys.exit("bad format in {}", path)
                 else:
                     key = line[1:-2]
                     val = ""
@@ -54,4 +55,10 @@ def fill_templates():
                 dest_file.write(filled)
 
 
+# Go to this directory to make the relative paths work.
+script_dir = os.path.dirname(sys.argv[0])
+if script_dir:
+    os.chdir(script_dir)
+
+# Generate the HTML files.
 fill_templates()

@@ -2,14 +2,32 @@
 
 """Makes the Scribbler Bot drive around objects."""
 
-#import Myro
+import myro
 
-from scribbler.programs import base
+from scribbler.programs.base import BaseProgram
 
-class Avoider(base.BaseProgram):
+class Avoider(BaseProgram):
 
     """."""
 
     def __init__(self):
         """."""
-        pass
+        BaseProgram.__init__(self)
+
+    def __call__(self, command):
+        base_response = BaseProgram.__call__(self, command)
+        if base_response:
+            return base_response
+        return "program-specific command"
+
+    def start(self):
+        BaseProgram.start(self)
+
+    def stop(self):
+        BaseProgram.stop(self)
+
+    def reset(self):
+        BaseProgram.reset(self)
+
+    def loop(self):
+        return BaseProgram.loop(self)

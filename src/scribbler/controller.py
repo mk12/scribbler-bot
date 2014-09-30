@@ -63,7 +63,6 @@ class Controller(object):
         """Accepts a command and either performs the desired action or passes
         the message on to the program. Returns a status message."""
         if command == 'short:sync':
-            print  "{} {}".format(self.program_id, bool(self.green))
             return "{} {}".format(self.program_id, bool(self.green))
         if command == 'long:status':
             return self.messages.get()

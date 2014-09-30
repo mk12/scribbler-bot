@@ -24,6 +24,11 @@ function clearConsole() {
 	consoleLines = 0;
 }
 
+// Returns true if the button is enabled and false otherwise.
+function isEnabled(id) {
+	return document.getElementById(id).className != 'disabled-button';
+}
+
 // Enable or disable a button by its element ID.
 function setEnabled(id, yes) {
 	document.getElementById(id).className = yes? '' : 'disabled-button';
@@ -58,7 +63,6 @@ function enableOtherPrograms(name) {
 // the others (only one can be selected at a time).
 function switchProgram(name) {
 	if (name == currentProgram) {
-		// This is impossible.
 		return;
 	}
 	enableOtherPrograms(name);
@@ -96,10 +100,12 @@ function btnStartStop() {
 // Tells the server to stop and reset the program. Changes the text of the
 // start/stop button and disables itself.
 function btnReset() {
-	setStartStop(true);
-	setEnabled('btnreset', false);
-	send('control:reset');
-	running = false;
+	if (isEnabled('btnreset')) {
+		setStartStop(true);
+		setEnabled('btnreset', false);
+		send('control:reset');
+		running = false;
+	}
 }
 
 // Sends a message to the server and adds the response to the console.

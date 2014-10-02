@@ -36,6 +36,6 @@ After each group member has submitted a proposal and one has been selected, we w
 
 ## License
 
-© 2014 Mitchell Kember, Justin Kim, Charles Bai, Leong Si, Renato Zveibil, Min Suk Kim, and Xiao-Yang Min
+© 2014 Mitchell Kember, Justin Kim, Charles Bai, Leong Si, Renato Zveibil, Min Suk Kim, and Michael Min
 
 Scribbler Bot is available under the MIT License; see [LICENSE](LICENSE.md) for details.

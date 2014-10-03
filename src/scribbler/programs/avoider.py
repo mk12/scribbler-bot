@@ -1,33 +1,25 @@
 # Copyright 2014 Mitchell Kember. Subject to the MIT License.
 
-"""Makes the Scribbler Bot drive around objects."""
+"""Makes the Scribbler Bot drive around an obstacle."""
 
 import myro
 
-from scribbler.programs.base import BaseProgram
+from scribbler.programs.base import SeqProgram
 
-class Avoider(BaseProgram):
 
-    """."""
+seq = [
+    ('fwd', 'ir>', 1000, "driving forward"),
+    ('bwd', 'dist', 10, "detected obstacle"),
+    ('ccw', 'angle', 90, "first turn"),
+    ('fwd', 'dist', 25, "driving along front"),
+    ('cw', 'angle', 90, "turning front corner"),
+    ('fwd', 'dist', 50, "driving along side"),
+    ('cw', 'angle', 90, "turning back corner"),
+    ('fwd', 'dist', 25, "driving along back"),
+    ('ccw', 'angle', 90, "returning to path")
+]
 
-    def __init__(self):
-        """."""
-        BaseProgram.__init__(self)
 
-    def __call__(self, command):
-        base_response = BaseProgram.__call__(self, command)
-        if base_response:
-            return base_response
-        return "program-specific command"
-
-    def start(self):
-        BaseProgram.start(self)
-
-    def stop(self):
-        BaseProgram.stop(self)
-
-    def reset(self):
-        BaseProgram.reset(self)
-
-    def loop(self):
-        return BaseProgram.loop(self)
+def Avoider():
+    """Creates a sequential Program based on the Avoider sequence."""
+    return SeqProgram(seq)

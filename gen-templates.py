@@ -5,6 +5,7 @@
 import os
 import sys
 
+
 PAGES = ['index', '404']
 SRC_DIR = 'template/'
 SRC_EXT = '.txt'

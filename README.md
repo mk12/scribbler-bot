@@ -26,9 +26,13 @@ Use the `-h` flag to see what other options there are.
 
 The web browser should have opened to `http://localhost:8080` automatically. You control Scribbler Bot via this web app. By clicking the buttons, you can choose a program, start/stop/reset the program, adjust the robot's speed, make it beep, display some information about the robot, clear the console, and toggle automatic scrolling of the console.
 
+## Testing
+
+If you want to test the project but you don't have access to the robot, replace the `import myro` lines with `import nomyro as myro`. This will provide dummy implementations of the Myro functions, so the program will run (but do nothing).
+
 ## Object avoidance
 
-The first assignment is to program the Scribbler Bot to avoid obstacles. More details will be included here soon.
+When the Avoider program is selected, the Scribbler drives in a straight line until it detects an object. It turns and drives around the object, then continues its path until it encounters another.
 
 ## Real task
 

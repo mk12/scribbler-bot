@@ -11,6 +11,7 @@ from sys import exit
 
 from scribbler.controller import Controller
 
+
 # Response statuses.
 STATUS_200 = '200 OK'
 STATUS_404 = '404 NOT FOUND'

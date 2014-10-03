@@ -7,7 +7,8 @@ from gevent.queue import Queue
 
 from scribbler.programs import avoider
 
-# Map program IDs to their respective classes.
+
+# Map program IDs to their respective classes or functions.
 PROGRAMS = {'avoid': avoider.Avoider}
 
 # This is the program that is initially active.
@@ -17,7 +18,7 @@ DEFAULT_PROGRAM = 'avoid'
 PROGRAM_PREFIX = 'program:'
 
 # Amount of time to sleep between main loop iterations (seconds).
-LOOP_DELAY = 0.2
+LOOP_DELAY = 0.02
 
 
 class Controller(object):
@@ -31,12 +32,14 @@ class Controller(object):
         self.program_id = program_id
         self.program = PROGRAMS[program_id]()
         self.green = None
+        self.can_reset = False
 
     def start(self):
         """Starts (or resumes) the execution of the program."""
         self.green = Greenlet(self.main_loop)
         self.green.start()
         self.program.start()
+        self.can_reset = True
 
     def stop(self):
         """Stops the execution of the program."""
@@ -44,11 +47,18 @@ class Controller(object):
         if self.green:
             self.green.kill()
 
+    def reset(self):
+        """Stops the program and resets it to its initial state."""
+        self.stop()
+        self.program.reset()
+        self.can_reset = False
+
     def switch_program(self, program_id):
         """Stops execution and switches to a new program."""
         self.stop()
         self.program_id = program_id
         self.program = PROGRAMS[program_id]()
+        self.can_reset = False
 
     def main_loop(self):
         """Runs the program's loop method continously, collecting any returned
@@ -63,7 +73,10 @@ class Controller(object):
         """Accepts a command and either performs the desired action or passes
         the message on to the program. Returns a status message."""
         if command == 'short:sync':
-            return "{} {}".format(self.program_id, bool(self.green))
+            pid = self.program_id
+            running = bool(self.green)
+            can_reset = self.can_reset
+            return "{} {} {}".format(pid, running, can_reset)
         if command == 'long:status':
             return self.messages.get()
         if command.startswith(PROGRAM_PREFIX):
@@ -81,7 +94,6 @@ class Controller(object):
             self.stop()
             return "program paused"
         if command == 'control:reset':
-            self.stop()
-            self.program.reset()
+            self.reset()
             return "program reset"
         return self.program(command)

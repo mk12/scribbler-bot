@@ -131,11 +131,15 @@ function synchronize() {
 		var vals = text.split(' ');
 		var sProgram = vals[0];
 		var sRunning = (vals[1] == 'True');
+		var sCanReset = (vals[2] == 'True');
 		if (currentProgram != sProgram) {
 			enableOtherPrograms(sProgram);
 		}
 		if (running != sRunning) {
 			setStartStop(!sRunning);
+		}
+		if (sCanReset != isEnabled('btnreset')) {
+			setEnabled('btnreset', sCanReset);
 		}
 		currentProgram = sProgram;
 		running = sRunning;

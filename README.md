@@ -1,8 +1,9 @@
 # Scribbler Bot
 
-Scribbler Bot is a project that we, group 22, are developing for SE 101 in 1A Software Engineering at Waterloo. It is written in Python and uses the [Myro][1] library to control a robot.
+Scribbler Bot is a project that we, group 22, are developing for SE 101 in 1A Software Engineering at Waterloo. It is written in Python and uses the [Myro][1] library to control a robot. We are organizing tasks for the project with [Trello boards][2].
 
 [1]: http://wiki.roboteducation.org/Myro_Reference_Manual
+[2]: https://trello.com/scribbler22
 
 ## Templates
 

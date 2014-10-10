@@ -18,7 +18,7 @@ DEFAULT_PROGRAM = 'avoid'
 PROGRAM_PREFIX = 'program:'
 
 # Amount of time to sleep between main loop iterations (seconds).
-LOOP_DELAY = 0.02
+LOOP_DELAY = 0.01
 
 
 class Controller(object):

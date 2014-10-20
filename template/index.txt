@@ -8,28 +8,29 @@ Scribbler Bot | Team 22
 		<label>Program</label>
 		<a id="btnavoid"
 		   class="disabled-button"
-		   onclick="javascript:switchProgram('program:avoid');">Avoid</a>
+		   onclick="switchProgram('program:avoid');">Avoid</a>
 		<a id="btnother">Other</a>
 	</section>
 	<section>
 		<label>Control</label>
-		<a id="btnstartstop" onclick="javascript:btnStartStop();">Start</a>
-		<a id="btnreset" onclick="javascript:btnReset();">Reset</a>
-	</section>
-	<section>
-		<label>Speed</label>
-		<a id="btndec" onclick="javascript:send('speed:dec');">Dec</a>
-		<a id="btninc" onclick="javascript:send('speed:inc');">Inc</a>
+		<a id="btnstartstop" onclick="btnStartStop();">Start</a>
+		<a id="btnreset" onclick="btnReset();">Reset</a>
 	</section>
 	<section>
 		<label>Other</label>
-		<a id="btnbeep" onclick="javascript:send('other:beep')">Beep</a>
-		<a id="btninfo" onclick="javascript:send('other:info')">Info</a>
+		<a id="btnbeep" onclick="send('other:beep')">Beep</a>
+		<a id="btninfo" onclick="send('other:info')">Info</a>
 	</section>
 	<section>
 		<label>Console</label>
-		<a id="btnclear" onclick="javascript:clearConsole();">Clear</a>
-		<a id="btnfreescroll" onclick="javascript:btnFreeScroll();">Free</a>
+		<a id="btnclear" onclick="clearConsole();">Clear</a>
+		<a id="btnfreescroll" onclick="btnFreeScroll();">Free</a>
 	</section>
+	<form onsubmit="setParameter(); return false;">
+		<label>Params</label>
+		<div><input id="param-name" type="text"></div>
+		<div><input id="param-value" type="text"></div>
+		<input type="submit" style="position: absolute; height: 0px; width: 0px; border: none; padding: 0px;" hidefocus="true" tabindex="-1">
+	</form>
 </section>
 <script src="/script.js"></script>

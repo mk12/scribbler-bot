@@ -41,7 +41,7 @@ h1 > #team  { color: #d55; }
 	border-spacing: 10px;
 }
 
-#controls > section {
+#controls > section, #controls > form {
 	display: table-row;
 }
 
@@ -61,6 +61,16 @@ h1 > #team  { color: #d55; }
 	border-radius: 6px;
 	letter-spacing: 2px;
 	cursor: pointer;
+}
+
+#controls div {
+	display: table-cell;
+}
+
+#controls div > input {
+	font-size: 20pt;
+	width: 156px;
+	height: 50px;
 }
 
 #controls a:hover {

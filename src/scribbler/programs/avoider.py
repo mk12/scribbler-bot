@@ -6,7 +6,9 @@ from time import time
 
 import myro
 
-from scribbler.programs.base import angle_to_time, average, BaseProgram
+from scribbler.programs.base import average, BaseProgram
+
+# TODO: All parameters!
 
 # The minimum sensor reading that is interpreted as an obstacle.
 OBSTACLE_THRESH = 2
@@ -48,6 +50,7 @@ class Avoider(BaseProgram):
         """Creates a new Avoider in a reset state."""
         BaseProgram.__init__(self)
         self.reset()
+        # self.params += more defaults
 
     def reset(self):
         """Stops and resets the program to the first mode."""
@@ -107,7 +110,7 @@ class Avoider(BaseProgram):
     def has_rotated(self, angle):
         """Returns true if the robot has rotated by `angle` degrees during the
         current mode (assumign it is pivoting) and false otherwise."""
-        return self.has_elapsed(angle_to_time(angle, self.speed))
+        return self.has_elapsed(self.angle_to_time(angle))
 
     def at_right_angle(self):
         """Returns true if the robot has rotated 90 degrees during the current

@@ -6,12 +6,21 @@ import time
 
 import myro
 
+PARAM_CODES = {
+    'bl': 'beep_len',
+    'bf': 'beep_freq',
+    's': 'speed',
+    'dtt': 'dist_to_time',
+    'att': 'angle_to_time'
+}
 
-BEEP_LEN = 0.5
-BEEP_FREQ = 2000
-
-SPEEDS = [x/10.0 for x in range(1, 11)]
-DEFAULT_SPEED_INDEX = 4
+PARAM_DEFAULTS = {
+    'beep_len': 0.5, # s
+    'beep_freq': 2000, # Hz
+    'speed': 0.5, # dimensionless
+    'dist_to_time': 0.07, # m/s
+    'angle_to_time': 0.009 # rad/s
+}
 
 
 class BaseProgram(object):
@@ -21,12 +30,22 @@ class BaseProgram(object):
 
     def __init__(self):
         """Creates a new base program."""
-        self.speed_ind = DEFAULT_SPEED_INDEX
+        self.params = PARAM_DEFAULTS
 
     @property
     def speed(self):
         """Returns the nominal speed of the robot."""
-        return SPEEDS[self.speed_ind]
+        return self.params['speed']
+
+    def dist_to_time(dist):
+        """Returns how long the robot should drive at its current speed in order
+        to cover `dist` centimetres."""
+        return self.params['dist_to_time'] * dist / self.speed
+
+    def angle_to_time(angle):
+        """Returns how long the robot should rotate at its current speed in
+        order to rotate by `angle` degrees."""
+        return self.params['angle_to_time'] * angle / self.speed
 
     # Subclasses should override the following methods (and call super).
     # `__call__` must return a status, and `loop` should sometimes.
@@ -34,21 +53,24 @@ class BaseProgram(object):
     def __call__(self, command):
         """Performs an action according to the command passed down from the
         controller, and returns a status message."""
-        if command == 'speed:inc':
-            if self.speed_ind == len(SPEEDS) - 1:
-                return "already at max speed"
-            self.speed_ind += 1
-            return "inc'd speed to {}".format(self.speed)
-        if command == 'speed:dec':
-            if self.speed_ind == 0:
-                return "already at min speed"
-            self.speed_ind -= 1
-            return "dec'd speed to {}".format(self.speed)
         if command == 'other:beep':
-            myro.beep(BEEP_LEN, BEEP_FREQ)
+            myro.beep(self.params['beep_len'], self.params['beep_freq'])
             return "successful beep"
         if command == 'other:info':
             return "battery: " + str(myro.getBattery())
+        if command.startswith('set:'):
+            code, value = command[4:].split('=')
+            if not code in PARAM_CODES:
+                return "invalid code: " + code
+            name = PARAM_CODES[code]
+            if value == "?":
+                return name + " = " + str(self.params[name])
+            try:
+                n = float(value)
+            except ValueError:
+                return "NaN: " + value
+            self.params[name] = n
+            return name + " = " + value
         return None
 
     def start(self):
@@ -161,16 +183,3 @@ def average(xs):
     """Returns the average of a list of floating-point values."""
     return sum(xs) / float(len(xs))
 
-
-def dist_to_time(dist, speed):
-    """Returns how long the robot should drive at the given speed in order to
-    cover `dist` centimetres."""
-    return 0.07 * dist / speed
-
-
-def angle_to_time(angle, speed):
-    """Returns how long the robot should rotate at the given speed in order to
-    rotate by `angle` degrees."""
-    # 1.0 -> 0.123
-    # 0.5 ->
-    return 0.009 * angle / speed

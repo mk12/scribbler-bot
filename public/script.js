@@ -108,6 +108,13 @@ function btnReset() {
 	}
 }
 
+// Changes the value of a parameter in the program based on the text fields.
+function setParameter() {
+	var name = document.getElementById('param-name').value;
+	var val = document.getElementById('param-value').value;
+	send('set:' + name + '=' + val);
+}
+
 // Sends a message to the server and adds the response to the console.
 function send(message) {
 	post(message, function(text) {

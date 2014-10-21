@@ -6,6 +6,8 @@ import time
 
 import myro
 
+
+# Short codes for the parameters of the program.
 PARAM_CODES = {
     'bl': 'beep_len',
     'bf': 'beep_freq',
@@ -14,35 +16,42 @@ PARAM_CODES = {
     'att': 'angle_to_time'
 }
 
+
+# Default values for the parameters of the program.
 PARAM_DEFAULTS = {
     'beep_len': 0.5, # s
     'beep_freq': 2000, # Hz
-    'speed': 0.5, # dimensionless
-    'dist_to_time': 0.07, # m/s
+    'speed': 0.5, # from 0.0 to 1.0
+    'dist_to_time': 0.07, # cm/s
     'angle_to_time': 0.009 # rad/s
 }
 
 
+# Prefix used in commands that change the value of a parameter.
+PARAM_PREFIX = 'set:'
+
+
 class BaseProgram(object):
 
-    """A base program that handles some of the details that communication with
-    the server involves."""
+    """Implements the general aspects of robot programs and basic server
+    communcation. Also manages the parameter dictionary."""
 
     def __init__(self):
         """Creates a new base program."""
         self.params = PARAM_DEFAULTS
+        self.codes = PARAM_CODES
 
     @property
     def speed(self):
         """Returns the nominal speed of the robot."""
         return self.params['speed']
 
-    def dist_to_time(dist):
+    def dist_to_time(self, dist):
         """Returns how long the robot should drive at its current speed in order
         to cover `dist` centimetres."""
         return self.params['dist_to_time'] * dist / self.speed
 
-    def angle_to_time(angle):
+    def angle_to_time(self, angle):
         """Returns how long the robot should rotate at its current speed in
         order to rotate by `angle` degrees."""
         return self.params['angle_to_time'] * angle / self.speed
@@ -58,12 +67,12 @@ class BaseProgram(object):
             return "successful beep"
         if command == 'other:info':
             return "battery: " + str(myro.getBattery())
-        if command.startswith('set:'):
-            code, value = command[4:].split('=')
-            if not code in PARAM_CODES:
+        if command.startswith(PARAM_PREFIX):
+            code, value = command[len(PARAM_PREFIX):].split('=')
+            if not code in self.codes:
                 return "invalid code: " + code
-            name = PARAM_CODES[code]
-            if value == "?":
+            name = self.codes[code]
+            if value == "" or value == "?":
                 return name + " = " + str(self.params[name])
             try:
                 n = float(value)

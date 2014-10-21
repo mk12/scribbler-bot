@@ -1,5 +1,11 @@
 // Copyright 2014 Mitchell Kember. Subject to the MIT License.
 
+// How often to synchronize with the server (ms).
+var syncInterval = 10000;
+
+// Timeout for AJAX requests (ms).
+var ajaxTimeout = 30000;
+
 // Keep track of lines in the console.
 var consoleLines = 0;
 var scrolling = true;
@@ -117,8 +123,10 @@ function setParameter() {
 
 // Sends a message to the server and adds the response to the console.
 function send(message) {
-	post(message, function(text) {
-		addToConsole(text);
+	post(message, function(text, success) {
+		addToConsole(success? text : message + " failed");
+	}, function() {
+		addToConsole(message + " timed out");
 	});
 }
 
@@ -126,15 +134,23 @@ function send(message) {
 // and repeats immediately. There is no delay because the server uses
 // long-polling, so the connection will stay open until there is a new status.
 function updateStatus() {
-	post('long:status', function(text) {
-		addToConsole(text);
+	post('long:status', function(text, success) {
+		addToConsole(success? text : "status request failed");
+		if (success) {
+			updateStatus();
+		}
+	}, function() {
 		updateStatus();
 	});
 }
 
 // Synchronizes the client state with the server.
 function synchronize() {
-	post('short:sync', function(text) {
+	post('short:sync', function(text, success) {
+		if (!success) {
+			addToConsole("sync failed");
+			return;
+		}
 		var vals = text.split(' ');
 		var sProgram = vals[0];
 		var sRunning = (vals[1] == 'True');
@@ -150,26 +166,32 @@ function synchronize() {
 		}
 		currentProgram = sProgram;
 		running = sRunning;
+	}, function() {
+		addToConsole("sync timed out");
 	})
 }
 
 // Sends data to the server via a POST request. Calls the onreceive function
 // with the response text as the argument when the request is completed.
-function post(data, onreceive) {
+function post(data, onreceive, ontimeout) {
 	var r = new XMLHttpRequest();
 	r.onreadystatechange = function() {
-		if (r.readyState == 4 && r.status == 200) {
-			onreceive(r.responseText);
+		if (r.readyState == 4) {
+			onreceive(r.responseText, r.status == 200);
 		}
 	}
 	r.open('POST', '/', true);
 	r.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	r.timeout = ajaxTimeout;
+	r.ontimeout = ontimeout;
 	r.send(data);
 }
 
 window.onload = function() {
 	synchronize();
-	addToConsole('in sync with server');
+	addToConsole("in sync with server");
+	// Sync every so often.
+	setInterval(synchronize, syncInterval);
 	// Begin the long-polling.
 	updateStatus();
 }

@@ -4,6 +4,7 @@
 
 from time import time
 
+# import nomyro as myro
 import myro
 
 from scribbler.programs.base import average, BaseProgram
@@ -17,21 +18,23 @@ PARAM_CODES = {
     'nn': 'not_ninety',
     'cd': 'check_dist',
     'of': 'overshoot_front',
-    'os': 'overshoot_side'
+    'os': 'overshoot_side',
+    'bi': 'bias',
+    'rf': 'return_factor'
 }
-
-#att 0.0072 good for 0.2 speed
 
 
 # Default values for the parameters of the program.
 PARAM_DEFAULTS = {
     'obstacle_slowdown': 0.2,
-    'obstacle_thresh': 2, # from 0 to 6400
+    'obstacle_thresh': 1, # from 0 to 6400
     'compare_rotation': 25, # deg
     'not_ninety': 80, # deg
-    'check_dist': 6.0, # cm
+    'check_dist': 8.0, # cm
     'overshoot_front': 10.0, # cm
-    'overshoot_side': 10.0, # cm
+    'overshoot_side': 14.0, # cm
+    'bias': 0, # from -1 to 1
+    'return_factor': 0.75
 }
 
 
@@ -67,7 +70,7 @@ class Avoider(BaseProgram):
         """Stops and resets the program to the first mode."""
         BaseProgram.reset(self)
         self.mode = 0
-        self.temporal_x = 0
+        self.x_pos = 0
         self.heading = 'up'
         self.start_time = 0
         self.pause_time = 0
@@ -87,6 +90,13 @@ class Avoider(BaseProgram):
         BaseProgram.start(self)
         self.start_time += time() - self.pause_time
         self.move()
+
+    @property
+    def speed(self):
+        """Returns the nominal speed of the robot."""
+        if self.mode in ['fwd-1', 'ccw-c', 'cw-c', 'fwd-4', 'fwd-5']:
+            return self.params['obstacle_slowdown']
+        return self.params['speed']
 
     def goto_mode(self, mode):
         """Stops the robot and switches to the given mode. Resets the timer and
@@ -127,7 +137,14 @@ class Avoider(BaseProgram):
     def has_rotated(self, angle):
         """Returns true if the robot has rotated by `angle` degrees during the
         current mode (assuming it is pivoting) and false otherwise."""
-        return self.has_elapsed(self.angle_to_time(angle))
+        d = self.mode_direction()
+        m = self.around_mult
+        t = self.angle_to_time(angle)
+        if d == 'ccw':
+            t *= 1 + m * self.params['bias']
+        elif d == 'cw':
+            t *= 1 - m * self.params['bias']
+        return self.has_elapsed(t)
 
     def at_right_angle(self):
         """Returns true if the robot has rotated 90 degrees during the current
@@ -140,18 +157,14 @@ class Avoider(BaseProgram):
 
     def drive(self, direction):
         """Makes the Myro call to drive the robot in the given direction."""
-        if self.mode == 'fwd-1':
-            speed = self.params['obstacle_slowdown']
-        else:
-            speed = self.speed
         if direction == 'fwd':
-            myro.forward(speed)
+            myro.forward(self.speed)
         if direction == 'bwd':
-            myro.backward(speed)
+            myro.backward(self.speed)
         if direction == 'ccw':
-            myro.rotate(self.around_mult * speed)
+            myro.rotate(self.around_mult * self.speed)
         if direction == 'cw':
-            myro.rotate(self.around_mult * -speed)
+            myro.rotate(self.around_mult * -self.speed)
 
     def status(self):
         """Return the status message that should be displayed at the beginning
@@ -215,10 +228,14 @@ class Avoider(BaseProgram):
                 self.side = 'side'
                 return self.goto_mode('cw-1')
             if self.obstacle():
+                myro.stop()
                 return self.goto_mode('ccw-1')
         if self.mode == 'fwd-5':
-            if self.has_elapsed(self.temporal_x):
+            if self.has_travelled(self.x_pos * self.params['return_factor']):
                 return self.goto_mode('ccw-3')
+            if self.obstacle():
+                myro.stop()
+                return self.goto_mode('ccw-1')
         if self.mode == 'ccw-3':
             if self.at_right_angle():
                 self.reset()
@@ -230,16 +247,17 @@ class Avoider(BaseProgram):
         if self.mode in ['fwd-1', 'ccw-c', 'cw-c']:
             return
         d = self.mode_direction()
+        dist = self.time_to_dist(self.mode_time())
         if d == 'fwd':
             if self.heading == 'out':
-                self.temporal_x += self.mode_time()
+                self.x_pos += dist
             elif self.heading == 'in':
-                self.temporal_x -= self.mode_time()
+                self.x_pos -= dist 
         elif d == 'bwd':
             if self.heading == 'out':
-                self.temporal_x -= self.mode_time()
+                self.x_pos -= dist
             elif self.heading == 'in':
-                self.temporal_x += self.mode_time()
+                self.x_pos += dist
         elif d == 'ccw':
             if self.heading == 'up':
                 self.heading = 'out'

@@ -4,6 +4,7 @@
 
 import time
 
+# import nomyro as myro
 import myro
 
 
@@ -21,7 +22,7 @@ PARAM_CODES = {
 PARAM_DEFAULTS = {
     'beep_len': 0.5, # s
     'beep_freq': 2000, # Hz
-    'speed': 0.5, # from 0.0 to 1.0
+    'speed': 0.4, # from 0.0 to 1.0
     'dist_to_time': 0.07, # cm/s
     'angle_to_time': 0.009 # rad/s
 }
@@ -55,6 +56,10 @@ class BaseProgram(object):
         """Returns how long the robot should rotate at its current speed in
         order to rotate by `angle` degrees."""
         return self.params['angle_to_time'] * angle / self.speed
+
+    def time_to_dist(self, time):
+        """The inverse of dist_to_time."""
+        return self.speed * time / self.params['dist_to_time']
 
     # Subclasses should override the following methods (and call super).
     # `__call__` must return a status, and `loop` should sometimes.

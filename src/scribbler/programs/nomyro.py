@@ -5,6 +5,10 @@
 import time
 
 
+def initialize(port):
+    pass
+
+
 def forward(speed):
     pass
 
@@ -21,7 +25,7 @@ def stop():
     pass
 
 
-def beep():
+def beep(length, freq):
     pass
 
 
@@ -29,5 +33,5 @@ def getObstacle():
     return [4000]
 
 
-def getInfo():
-    return "myro info"
+def getBattery():
+    return "9"

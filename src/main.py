@@ -6,6 +6,7 @@ import argparse
 import os
 import sys
 
+# import scribbler.programs.nomyro as myro
 import myro
 
 from scribbler.server import Server

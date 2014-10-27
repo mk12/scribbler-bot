@@ -123,8 +123,8 @@ function setParameter() {
 
 // Sends a message to the server and adds the response to the console.
 function send(message) {
-	post(message, function(text, success) {
-		addToConsole(success? text : message + " failed");
+	post(message, function(text) {
+		addToConsole(text);
 	}, function() {
 		addToConsole(message + " timed out");
 	});
@@ -134,11 +134,9 @@ function send(message) {
 // and repeats immediately. There is no delay because the server uses
 // long-polling, so the connection will stay open until there is a new status.
 function updateStatus() {
-	post('long:status', function(text, success) {
-		addToConsole(success? text : "status request failed");
-		if (success) {
-			updateStatus();
-		}
+	post('long:status', function(text) {
+		addToConsole(text);
+		updateStatus();
 	}, function() {
 		updateStatus();
 	});
@@ -146,11 +144,7 @@ function updateStatus() {
 
 // Synchronizes the client state with the server.
 function synchronize() {
-	post('short:sync', function(text, success) {
-		if (!success) {
-			addToConsole("sync failed");
-			return;
-		}
+	post('short:sync', function(text) {
 		var vals = text.split(' ');
 		var sProgram = vals[0];
 		var sRunning = (vals[1] == 'True');
@@ -176,10 +170,10 @@ function synchronize() {
 function post(data, onreceive, ontimeout) {
 	var r = new XMLHttpRequest();
 	r.onreadystatechange = function() {
-		if (r.readyState == 4) {
-			onreceive(r.responseText, r.status == 200);
+		if (r.readyState == 4 && r.status == 200) {
+			onreceive(r.responseText);
 		}
-	}
+	};
 	r.open('POST', '/', true);
 	r.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 	r.timeout = ajaxTimeout;

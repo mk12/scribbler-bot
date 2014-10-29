@@ -5,10 +5,10 @@
 - Mitchell: Leader
 - Michael: Manager
 - Charles: Reporter
-- Min: ???
-- Justin: ???
-- Leong: ???
-- Renato: ???
+- Min: Algorithm Developer
+- Justin: UI Designer
+- Leong: Reporter
+- Renato: Documenter
 
 ## Outline
 

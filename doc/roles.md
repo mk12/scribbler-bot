@@ -3,25 +3,25 @@
 ## Outline
 
 - web application
--- server
--- controller
--- templator
--- client
+	- server
+	- controller
+	- templating
+	- client
 - robot program
--- object avoidance
--- real project
---- **user interface**
---- **algorithm**
---- implementation
+	- object avoidance
+	- real project
+		- **user interface**
+		- **algorithm**
+		- implementation
 - **documentation**
--- code docstrings
--- general project documentation
+	- code docstrings
+	- general project documentation
 - report
--- **requirements**
--- **the rest**
+	- **requirements**
+	- **the rest**
 - **management**
--- ensuring progress
--- organizing meetings
+	- ensuring progress
+	- organizing meetings
 
 ## Current state
 

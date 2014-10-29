@@ -1,5 +1,15 @@
 # Roles
 
+## Team members
+
+- Mitchell: Leader
+- Michael: Manager
+- Charles: Reporter
+- Min: ???
+- Justin: ???
+- Leong: ???
+- Renato: ???
+
 ## Outline
 
 - web application

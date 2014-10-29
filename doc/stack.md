@@ -6,7 +6,7 @@ Communication: HTTP
 
 ### Client
 
-Language: Javascript
+Language: Javascript  
 Location: browser
 
 - Controls the user interface.
@@ -16,7 +16,7 @@ Location: browser
 
 ### Server
 
-Language: Python
+Language: Python  
 Location: server machine
 
 - Responds to requests.
@@ -35,7 +35,7 @@ Communication: call/return
 
 ### Controller
 
-Language: Python
+Language: Python  
 Location: server machine
 
 - Runs the Program's main loop.
@@ -56,7 +56,7 @@ Communication: Bluetooth
 
 ### Program
 
-Language: Python
+Language: Python  
 Location: server machine
 
 - Runs algorithms to control the Robot.
@@ -64,7 +64,7 @@ Location: server machine
 
 ### Robot
 
-Language: hardware
+Language: hardware  
 Location: real world
 
 - Controls the DC motors and speakers.

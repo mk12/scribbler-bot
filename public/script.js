@@ -71,7 +71,7 @@ function switchProgram(name) {
 	if (name == currentProgram) {
 		return;
 	}
-	enableOtherPrograms(name);
+	//enableOtherPrograms(name);
 	send('program:' + name);
 }
 

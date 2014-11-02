@@ -4,9 +4,6 @@
 
 import time
 
-# import nomyro as myro
-import myro
-
 
 # Short codes for the parameters of the program.
 PARAM_CODES = {

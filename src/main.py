@@ -5,9 +5,7 @@
 import argparse
 import os
 import sys
-
-# import scribbler.programs.nomyro as myro
-import myro
+import __builtin__
 
 from scribbler.server import Server
 
@@ -50,6 +48,12 @@ parser.add_argument(
     default='/dev/tty.Fluke2-0530-Fluke2',
     help="the Scribbler is on this Bluetooth serial port"
 )
+parser.add_argument(
+    '-d',
+    '--dummymyro',
+    action='store_true',
+    help="use a dummy Myro library"
+)
 
 # Go to this directory to make the relative paths work.
 script_dir = os.path.dirname(sys.argv[0])
@@ -58,6 +62,15 @@ if script_dir:
 
 # Parse the command-line arguments.
 args = parser.parse_args()
+
+# Import Myro, or the dummy version.
+if args.dummymyro:
+    import scribbler.programs.nomyro as myro
+else:
+    import myro
+
+# This is an ugly hack. I know.
+__builtin__.myro = myro
 
 # Start Myro
 myro.initialize(args.bluetooth)

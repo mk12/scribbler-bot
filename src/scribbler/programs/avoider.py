@@ -4,9 +4,6 @@
 
 from time import time
 
-# import nomyro as myro
-import myro
-
 from scribbler.programs.base import average, BaseProgram
 
 

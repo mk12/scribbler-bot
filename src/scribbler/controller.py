@@ -5,14 +5,14 @@
 from gevent import Greenlet, sleep
 from gevent.queue import Queue
 
-from scribbler.programs import avoider
+from scribbler.programs import avoider, tracie
 
 
 # Map program IDs to their respective classes or functions.
-PROGRAMS = {'avoid': avoider.Avoider}
+PROGRAMS = {'avoid': avoider.Avoider, 'tracie': tracie.Tracie}
 
 # This is the program that is initially active.
-DEFAULT_PROGRAM = 'avoid'
+DEFAULT_PROGRAM = 'tracie'
 
 # The prefix to a command which indicates a program switch.
 PROGRAM_PREFIX = 'program:'

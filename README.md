@@ -35,9 +35,9 @@ If you want to test the project but you don't have access to the robot, replace 
 
 When the Avoider program is selected, the Scribbler drives in a straight line until it detects an object. It turns and drives around the object, then continues its path until it encounters another.
 
-## Real task
+## Tracie
 
-After each group member has submitted a proposal and one has been selected, we will start work on the main part of the project.
+Tracie traces shapes. More info here later.
 
 ## License
 

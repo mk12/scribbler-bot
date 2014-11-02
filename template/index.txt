@@ -7,10 +7,10 @@ Scribbler Bot | Team 22
 	<section>
 		<label>Program</label>
 		<a id="btnavoid"
-		   onclick="switchProgram('program:avoid');">Avoid</a>
-		<a id="btnother"
+		   onclick="switchProgram('avoid');">Avoid</a>
+		<a id="btntracie"
 		   class="disabled-button"
-		   onclick="switchProgram('program:tracie');">Tracie</a>
+		   onclick="switchProgram('tracie');">Tracie</a>
 	</section>
 	<section>
 		<label>Control</label>

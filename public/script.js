@@ -52,8 +52,8 @@ function btnFreeScroll() {
 }
 
 // Keep track of the currently executing program.
-var currentProgram = 'avoid';
-var allPrograms = ['avoid', 'other'];
+var currentProgram = 'tracie';
+var allPrograms = ['avoid', 'tracie'];
 
 // Disables the specified program button and enables the rest.
 function enableOtherPrograms(name) {
@@ -71,8 +71,9 @@ function switchProgram(name) {
 	if (name == currentProgram) {
 		return;
 	}
-	//enableOtherPrograms(name);
+	enableOtherPrograms(name);
 	send('program:' + name);
+	currentProgram = name;
 }
 
 // Keep track of the state of program execution.

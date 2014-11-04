@@ -2,6 +2,8 @@
 
 # Copyright 2014 Mitchell Kember. Subject to the MIT License.
 
+from __future__ import print_function
+
 import argparse
 import os
 import sys
@@ -62,6 +64,12 @@ if script_dir:
 
 # Parse the command-line arguments.
 args = parser.parse_args()
+
+# Make sure the files have been generated:
+if any([not os.path.exists(PUBLIC + p) for p in WHITELIST]):
+    print("error: missing files in /public", file=sys.stderr)
+    print("Did you forget to run 'python gen-templates.py'?", file=sys.stderr)
+    sys.exit(1)
 
 # Import Myro, or the dummy version.
 if args.dummymyro:

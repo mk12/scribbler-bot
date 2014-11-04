@@ -2,7 +2,7 @@
 
 """Implements common functionality for Scribbler programs."""
 
-import time
+from time import time
 
 
 # Short codes for the parameters of the program.
@@ -36,8 +36,15 @@ class BaseProgram(object):
 
     def __init__(self):
         """Creates a new base program."""
-        self.params = PARAM_DEFAULTS
-        self.codes = PARAM_CODES
+        self.params = PARAM_DEFAULTS.copy()
+        self.codes = PARAM_CODES.copy()
+
+    def add_params(self, defaults, codes):
+        """Adds parameters to the program given their default values and their
+        short codes, which must be dictionaries similar to PARAM_CODES and
+        PARAM_DEFAULTS (defined above)."""
+        self.params.update(defaults)
+        self.codes.update(codes)
 
     @property
     def speed(self):
@@ -74,12 +81,14 @@ class BaseProgram(object):
             if not code in self.codes:
                 return "invalid code: " + code
             name = self.codes[code]
+            # Return the value of the parameter.
             if value == "" or value == "?":
                 return name + " = " + str(self.params[name])
             try:
                 n = float(value)
             except ValueError:
                 return "NaN: " + value
+            # Set the parameter to the new value.
             self.params[name] = n
             return name + " = " + value
         return None
@@ -101,96 +110,87 @@ class BaseProgram(object):
         pass
 
 
-class SeqProgram(BaseProgram):
+class ModeProgram(BaseProgram):
 
-    """A program that interprets a sequence of instructions.
+    """A program that operates in one mode per distinct motion."""
 
-    The sequence is a list of modes. A mode is represented by a triple of the
-    form `(i, c, p, s)` where `i` is an instruction string, `c` is the
-    condition, `p` is the parameter of the condition, and `s` is the status
-    message to display. The program beings by performing the instruction of the
-    first mode, and it moves on to the next mode when the condition of the first
-    mode is met. After the last mode, we return to the first mode.
-    """
-
-    def __init__(self, seq):
-        """Creates a program that interprets the given sequence."""
+    def __init__(self, initial_mode):
+        """Creates a new ModeProgram it its default state."""
         BaseProgram.__init__(self)
-        self.seq = seq
-        self.build_maps()
+        self.initial_mode = initial_mode
         self.reset()
 
-    def build_maps(self):
-        self.instructions = {
-            'fwd': lambda t: myro.forward(self.speed),
-            'bwd': lambda t: myro.backward(self.speed),
-            'ccw': lambda t: myro.rotate(self.speed),
-            'cw': lambda t: myro.rotate(-self.speed)
-        }
-        self.conditions = {
-            'ir>': lambda v: average(myro.getObstacle()) > v,
-            'time': lambda t: self.time > t,
-            'dist': lambda d: self.time > dist_to_time(d, self.speed),
-            'angle': lambda a: self.time > angle_to_time(a, self.speed),
-            'forever': lambda _: False,
-        }
-
-    @property
-    def time(self):
-        """Returns the time elapsed since the current mode was started."""
-        return time.time() - self.start_time
-
-    def increment_mode(self):
-        """Increments the mode index (wrapping around if necessary), updates
-        mode variables, and resets the timer."""
-        myro.stop()
-        self.mode_ind += 1
-        self.mode_ind %= len(self.seq)
-        self.i, self.c, self.p, self.s = self.seq[self.mode_ind]
-        self.start_time = time.time()
-
     def reset(self):
-        """Resets the program to the first mode."""
+        """Stops and resets the program to the first mode."""
         BaseProgram.reset(self)
-        self.mode_ind = -1
+        self.mode = self.initial_mode
+        self.start_time = 0
+        self.pause_time = 0
 
     def stop(self):
-        """Record the time when the program is paused."""
+        """Pauses and records the current time."""
         BaseProgram.stop(self)
-        self.pause_time = time.time()
+        self.pause_time = time()
 
     def start(self):
-        """Fixes the start time so that the pause doesn't count towards the
-        elapsed time, and continues the previous motion of the robot."""
+        """Resumes the program and fixes the timer so that the time while the
+        program was paused doesn't count towards the mode's time."""
         BaseProgram.start(self)
-        self.start_time += time.time() - self.pause_time
-        self.perform_instruction()
+        self.start_time += time() - self.pause_time
+        self.move()
 
-    def perform_instruction(self):
-        """Performs the instruction dictated by the current mode."""
-        self.instructions[self.i](self.p)
+    def goto_mode(self, mode):
+        """Stops the robot and switches to the given mode. Resets the timer and
+        starts the new mode immediately."""
+        myro.stop()
+        self.end_mode()
+        self.mode = mode
+        self.start_time = time()
+        self.begin_mode()
+        self.move()
 
-    def condition_satisfied(self):
-        """Returns whether the current mode's condition is satisfied."""
-        return self.mode_ind == -1 or self.conditions[self.c](self.p)
+    def mode_time(self):
+        """Returns the time that has elapsed since the mode begun."""
+        return time() - self.start_time
 
-    def loop(self):
-        """Advances to the next mode and performs the instruction when it is
-        time (when the condition is met), otherwise does nothing."""
-        BaseProgram.loop(self)
-        if self.condition_satisfied():
-            self.increment_mode()
-            self.perform_instruction()
-            return self.s
+    def has_elapsed(self, t):
+        """Returns true if `t` seconds have elapsed sicne the current mode begun
+        and false otherwise."""
+        return self.mode_time() > t
 
-    def __call__(self, command):
-        base_response = BaseProgram.__call__(self, command)
-        if base_response:
-            return base_response
-        return "unrecognized command"
+    def has_travelled(self, dist):
+        """Returns true if the robot has driven `dist` centimetres driving the
+        current mode (assuming it is driving straight) and false otherwise."""
+        return self.has_elapsed(self.dist_to_time(dist))
+
+    def has_rotated(self, angle):
+        """Returns true if the robot has rotated by `angle` degrees during the
+        current mode (assuming it is pivoting) and false otherwise."""
+        t = self.angle_to_time(angle)
+        return self.has_elapsed(t)
+
+    def at_right_angle(self):
+        """Returns true if the robot has rotated 90 degrees during the current
+        mode (assuming it is pivoting) and false otherwise."""
+        return self.has_rotated(90)
+
+    # Subclasses should override the following three methods and `loop`.
+
+    def move(self):
+        """Makes Myro calls to move the robot according to the current mode.
+        Called when the mode is begun and whenever the program is resumed."""
+        pass
+
+    def begin_mode(self):
+        """Called when a new mode is begun."""
+        pass
+
+    def end_mode(self):
+        """Called when the mode is about to switch."""
+        pass
 
 
-def average(xs):
-    """Returns the average of a list of floating-point values."""
-    return sum(xs) / float(len(xs))
-
+def obstacle_average():
+    """Returns the average of the three obstacle sensor readings."""
+    readings = myro.getObstacle()
+    return sum(readings) / float(len(readings))

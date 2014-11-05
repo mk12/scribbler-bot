@@ -64,10 +64,10 @@ class Controller(object):
         """Runs the program's loop method continously, collecting any returned
         messages into the messages queue."""
         while True:
+            sleep(LOOP_DELAY)
             msg = self.program.loop()
             if msg:
                 self.messages.put(msg)
-            sleep(LOOP_DELAY)
 
     def __call__(self, command):
         """Accepts a command and either performs the desired action or passes

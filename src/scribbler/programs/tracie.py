@@ -25,17 +25,17 @@ class Tracie(ModeProgram):
     """Tracie takes a set of points as input and draws the shape with a pen."""
 
     def __init__(self):
+        # TODO: how/when to set points?
+        self.points = [(0, 0), (10, 10), (20, 0), (0, 0)]
         ModeProgram.__init__(self, 0)
         self.add_params(PARAM_DEFAULTS, PARAM_CODES)
-        # TODO: how/when to set points?
-        self.points = [(0, 0), (1, 1), (2, 0), (0, 0)]
 
     def reset(self):
         ModeProgram.reset(self)
         self.index = 1
-        self.heading = 0
         self.rot_dir = 1
         self.go_for = 0
+        self.heading = self.next_point_angle()
 
     @property
     def speed(self):
@@ -68,45 +68,26 @@ class Tracie(ModeProgram):
     def set_drive_time(self):
         """Sets the time duration for which the robot should drive in order to
         get to the next point."""
-        # TODO: implement this function
-        # The robot is current at self.points[self.index-1].
-        # It should drive to the point self.points[self.index].
-        # Find the distance between these points, convert it to time, and then
-        # store the result in self.go_for.
         x1, y1 = self.points[self.index -1]
         x2, y2 = self.points[self.index]
-        distance = math.sqrt(math.pow((y2 - y1), 2) + math.pow((x2 - x1), 2))
-        time = self.dist_to_time(distance)
-        self.go_for = time
-        
+        distance = math.sqrt(math.pow(y2 - y1, 2) + math.pow(x2 - x1, 2))
+        self.go_for = self.dist_to_time(distance)
 
     def set_rotate_time(self):
         """Sets the time duration for which the robot should rotate in order to
         be facing the next point."""
-        # TODO: implement this function
-        # The robot is current at self.points[self.index-1].
-        # It should turn to face the point self.points[self.index].
-        # Find the angle that it must turn, convert it to time, and then store
-        # the result in self.go_for.
+        new_heading = self.next_point_angle()
+        delta = new_heading - self.heading
+        self.rot_dir = 1 if delta > 0 else -1
+        self.go_for = self.radians_to_time(self.rot_dir * delta)
+        self.heading = new_heading
+
+    def next_point_angle(self):
+        """Calculates the angle that the line connecting the current point and
+        the next point makes in standard position."""
         x1, y1 = self.points[self.index -1]
         x2, y2 = self.points[self.index]
-        yDistance = y2 - y1
-        xDistance = x2 - x1
-        angle = math.atan2(yDistance/xDistance)
-
-        # Clockwise is negative and counterclockwise is positive
-        cwRotation = -1*(self.heading - angle)
-
-        if fabs(cwRotation) <= math.pi:
-            self.heading = angle
-            time = self.radians_to_time(cwRotation)
-            self.go_for = time
-
-        elif fabs(cwRotation) > math.pi:
-            self.heading = angle
-            time = self.radians_to_time(2*math.pi - cwRotation)
-            self.go_for = time
-            
+        return math.atan2(y2 - y1, x2 - x2)
 
     def move(self):
         """Makes Myro calls to move the robot according to the current mode.

@@ -72,6 +72,8 @@ function switchProgram(name) {
 		return;
 	}
 	enableOtherPrograms(name);
+	setStartStop(true);
+	setEnabled('btnreset', false);
 	send('program:' + name);
 	currentProgram = name;
 }
@@ -126,6 +128,7 @@ function setParameter() {
 function send(message) {
 	post(message, function(text) {
 		addToConsole(text);
+		synchronize();
 	}, function() {
 		addToConsole(message + " timed out");
 	});
@@ -150,15 +153,9 @@ function synchronize() {
 		var sProgram = vals[0];
 		var sRunning = (vals[1] == 'True');
 		var sCanReset = (vals[2] == 'True');
-		if (currentProgram != sProgram) {
-			enableOtherPrograms(sProgram);
-		}
-		if (running != sRunning) {
-			setStartStop(!sRunning);
-		}
-		if (sCanReset != isEnabled('btnreset')) {
-			setEnabled('btnreset', sCanReset);
-		}
+		enableOtherPrograms(sProgram);
+		setStartStop(!sRunning);
+		setEnabled('btnreset', sCanReset);
 		currentProgram = sProgram;
 		running = sRunning;
 	}, function() {

@@ -103,6 +103,7 @@ class Avoider(ModeProgram):
         return self.has_elapsed(t)
 
     def move(self):
+        ModeProgram.move(self)
         direction = self.mode_direction()
         if direction == 'fwd':
             myro.forward(self.speed)
@@ -180,6 +181,7 @@ class Avoider(ModeProgram):
                 return "restarting program"
 
     def end_mode(self):
+        ModeProgram.end_mode(self)
         if self.mode in ['fwd-1', 'ccw-c', 'cw-c']:
             return
         # Keep track of the current x-position.

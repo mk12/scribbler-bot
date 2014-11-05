@@ -1,6 +1,6 @@
 # Copyright 2014 Mitchell Kember. Subject to the MIT License.
 
-"""Implements common functionality for Scribbler programs."""
+"""Implements an early program-type that we are no longer using."""
 
 import time.time
 

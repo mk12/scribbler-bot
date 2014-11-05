@@ -1,10 +1,11 @@
 # Copyright 2014 Mitchell Kember. Subject to the MIT License.
 
-"""..."""
+"""Makes the Scribbler Bot trace shapes with a marker."""
 
+import math
 from time import time
 
-from scribbler.programs.base import BaseProgram
+from scribbler.programs.base import ModeProgram
 
 
 # Short codes for the parameters of the program.
@@ -19,113 +20,88 @@ PARAM_DEFAULTS = {
 }
 
 
-class Tracie(BaseProgram):
+class Tracie(ModeProgram):
 
-    """..."""
+    """Tracie takes a set of points as input and draws the shape with a pen."""
 
     def __init__(self):
-        BaseProgram.__init__(self)
+        ModeProgram.__init__(self, 0)
+        self.add_params(PARAM_DEFAULTS, PARAM_CODES)
         # TODO: how/when to set points?
-        self.points = []
-        self.params.update(PARAM_DEFAULTS)
-        self.codes.update(PARAM_CODES)
-        self.reset()
+        self.points = [(0, 0), (1, 1), (2, 0), (0, 0)]
 
     def reset(self):
-        """."""
-        BaseProgram.reset(self)
-        self.index = 0
+        ModeProgram.reset(self)
+        self.index = 1
         self.heading = 0
-        self.pause_time = 0
-        self.start_time = 0
         self.rot_dir = 1
-        self.move_time = 0
-        self.mode = 'halt'
-
-    def stop(self):
-        """Pauses and records the current time."""
-        BaseProgram.stop(self)
-        self.pause_time = time()
-
-    def start(self):
-        """Resumes the program and fixes the timer so that the time while the
-        program was paused doesn't count towards the mode's time."""
-        BaseProgram.start(self)
-        self.start_time += time() - self.pause_time
-        self.move()
+        self.go_for = 0
 
     @property
     def speed(self):
-        """Returns the nominal speed of the robot."""
         if self.mode == 'rotate':
             return self.params['rotation_speed']
         return self.params['speed']
 
+    def is_mode_done(self):
+        """Returns true if the current mode is finished, and false otherwise.
+        The 'halt' mode is never done."""
+        z = self.mode == 0
+        halt = self.mode == 'halt'
+        return z or (not halt and self.has_elapsed(self.go_for))
+
     def next_mode(self):
-        """."""
-        myro.stop()
-        self.end_mode()
-        # TODO: clean this up
-        if self.mode == 'drive':
-            self.index += 1
-            if self.index == len(self.points):
-                self.mode = 'halt'
-            else:
-                self.set_rotate_time()
-                self.mode = 'rotate'
-        elif self.mode == 'rotate':
+        """Switches to the next mode and starts it."""
+        if self.mode == 'halt':
+            return
+        if self.mode == 0 or self.mode == 'rotate':
             self.set_drive_time()
-            self.mode = 'drive'
-        self.start_time = time()
-        self.begin_mode()
-        self.move()
-        return self.status()
+            self.goto_mode('drive')
+        elif self.mode == 'drive':
+            self.index += 1
+            if self.index < len(self.points):
+                self.set_rotate_time()
+                self.goto_mode('rotate')
+            else:
+                self.goto_mode('halt')
 
     def set_drive_time(self):
-        # set self.move_time
-        # (use self.dist_to_time(d)
-        pass
+        """Sets the time duration for which the robot should drive in order to
+        get to the next point."""
+        # TODO: implement this function
+        # The robot is current at self.points[self.index-1].
+        # It should drive to the point self.points[self.index].
+        # Find the distance between these points, convert it to time, and then
+        # store the result in self.go_for.
 
     def set_rotate_time(self):
-        # self.angle_to_time(a)
-        pass
+        """Sets the time duration for which the robot should rotate in order to
+        be facing the next point."""
+        # TODO: implement this function
+        # The robot is current at self.points[self.index-1].
+        # It should turn to face the point self.points[self.index].
+        # Find the angle that it must turn, convert it to time, and then store
+        # the result in self.go_for.
 
     def move(self):
         """Makes Myro calls to move the robot according to the current mode.
         Called when the mode is begun and whenever the program is resumed."""
+        ModeProgram.move(self)
         if self.mode == 'halt':
             myro.stop()
         if self.mode == 'drive':
             myro.forward(self.speed)
         if self.mode == 'rotate':
-            self.rotate(self.rot_mult * self.speed)
-
-    def mode_time(self):
-        """Returns the time that has elapsed since the mode begun."""
-        return time() - self.start_time
-
-    def has_elapsed(self, t):
-        """Returns true if `t` seconds have elapsed sicne the current mode begun
-        and false otherwise."""
-        return self.mode_time() > t
+            myro.rotate(self.rot_dir * self.speed)
 
     def status(self):
         """Return the status message that should be displayed at the beginning
         of the current mode."""
         # return STATUSES.get(self.mode, "bad mode" + str(self.mode))
-        return "something"
-
-    def begin_mode(self):
-        """Called exactly once when each mode is begun."""
-        pass
+        return self.mode
 
     def loop(self):
-        """The main loop of the program (executes continuosly)."""
-        BaseProgram.loop(self)
-        # stuff
-
-    def end_mode(self):
-        """..."""
-        if self.mode in ['drive', 'rotate']:
-            if self.has_elapsed(self.move_time):
-                return self.next_mode()
+        ModeProgram.loop(self)
+        if self.is_mode_done():
+            self.next_mode()
+            return self.status()

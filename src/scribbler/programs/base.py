@@ -2,6 +2,7 @@
 
 """Implements common functionality for Scribbler programs."""
 
+import math
 from time import time
 
 
@@ -61,8 +62,12 @@ class BaseProgram(object):
         order to rotate by `angle` degrees."""
         return self.params['angle_to_time'] * angle / self.speed
 
+    def radians_to_time(self, theta):
+        """Like `angle_to_time`, but the angle is in radians."""
+        return self.angle_to_time(180 * theta / math.pi)
+
     def time_to_dist(self, time):
-        """The inverse of dist_to_time."""
+        """The inverse of `dist_to_time`."""
         return self.speed * time / self.params['dist_to_time']
 
     # Subclasses should override the following methods (and call super).

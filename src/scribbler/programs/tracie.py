@@ -1,4 +1,4 @@
-# Copyright 2014 Mitchell Kember. Subject to the MIT License.
+# Copyright 2014 Mitchell Kember and Charles Bai. Subject to the MIT License.
 
 """Makes the Scribbler Bot trace shapes with a marker."""
 
@@ -73,6 +73,12 @@ class Tracie(ModeProgram):
         # It should drive to the point self.points[self.index].
         # Find the distance between these points, convert it to time, and then
         # store the result in self.go_for.
+        x1, y1 = self.points[self.index -1]
+        x2, y2 = self.points[self.index]
+        distance = math.sqrt(math.pow((y2 - y1), 2) + math.pow((x2 - x1), 2))
+        time = self.dist_to_time(distance)
+        self.go_for = time
+        
 
     def set_rotate_time(self):
         """Sets the time duration for which the robot should rotate in order to
@@ -82,6 +88,25 @@ class Tracie(ModeProgram):
         # It should turn to face the point self.points[self.index].
         # Find the angle that it must turn, convert it to time, and then store
         # the result in self.go_for.
+        x1, y1 = self.points[self.index -1]
+        x2, y2 = self.points[self.index]
+        yDistance = y2 - y1
+        xDistance = x2 - x1
+        angle = math.atan2(yDistance/xDistance)
+
+        # Clockwise is negative and counterclockwise is positive
+        cwRotation = -1*(self.heading - angle)
+
+        if fabs(cwRotation) <= math.pi:
+            self.heading = angle
+            time = self.radians_to_time(cwRotation)
+            self.go_for = time
+
+        elif fabs(cwRotation) > math.pi:
+            self.heading = angle
+            time = self.radians_to_time(2*math.pi - cwRotation)
+            self.go_for = time
+            
 
     def move(self):
         """Makes Myro calls to move the robot according to the current mode.

@@ -7,11 +7,11 @@ import sys
 
 
 PAGES = ['index', '404']
-SRC_DIR = 'template/'
+SRC_DIR = '../template/'
 SRC_EXT = '.txt'
-DEST_DIR = 'public/'
+DEST_DIR = '../public/'
 DEST_EXT = '.html'
-TEMPLATE = 'template/page.html'
+TEMPLATE = SRC_DIR + 'page.html'
 
 
 def build_dict(path):
@@ -42,7 +42,7 @@ def build_dict(path):
     return d
 
 
-def fill_templates():
+def generate():
     """Fills the template with the generated dictionaries for each page and
     writes the HTML into the public folder."""
     with open(TEMPLATE) as template_file:
@@ -56,10 +56,9 @@ def fill_templates():
                 dest_file.write(filled)
 
 
-# Go to this directory to make the relative paths work.
-script_dir = os.path.dirname(sys.argv[0])
-if script_dir:
-    os.chdir(script_dir)
-
-# Generate the HTML files.
-fill_templates()
+if __name__ == '__main__':
+    # Go to this directory to make the relative paths work.
+    script_dir = os.path.dirname(sys.argv[0])
+    if script_dir:
+        os.chdir(script_dir)
+    generate()

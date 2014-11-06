@@ -11,6 +11,8 @@ import __builtin__
 
 from scribbler.server import Server
 
+import template
+
 
 # Description for the usage message.
 DESC = "Starts the Scribbler Bot server."
@@ -65,10 +67,12 @@ if script_dir:
 # Parse the command-line arguments.
 args = parser.parse_args()
 
-# Make sure the files have been generated:
+# Generate the HTML from the templates.
+template.generate()
+
+# Make sure they are all there.
 if any([not os.path.exists(PUBLIC + p) for p in WHITELIST]):
     print("error: missing files in /public", file=sys.stderr)
-    print("Did you forget to run 'python gen-templates.py'?", file=sys.stderr)
     sys.exit(1)
 
 # Import Myro, or the dummy version.

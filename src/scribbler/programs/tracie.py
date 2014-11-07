@@ -2,6 +2,7 @@
 
 """Makes the Scribbler Bot trace shapes with a marker."""
 
+import json
 import math
 from time import time
 
@@ -10,13 +11,15 @@ from scribbler.programs.base import ModeProgram
 
 # Short codes for the parameters of the program.
 PARAM_CODES = {
-    'rs': 'rotation_speed'
+    'rs': 'rotation_speed',
+    'ps': 'point_scale'
 }
 
 
 # Default values for the parameters of the program.
 PARAM_DEFAULTS = {
-    'rotation_speed': 0.5
+    'rotation_speed': 0.5,
+    'point_scale': 0.02
 }
 
 
@@ -36,6 +39,19 @@ class Tracie(ModeProgram):
         self.rot_dir = 1
         self.go_for = 0
         self.heading = self.next_point_angle()
+
+    def __call__(self, command):
+        p_status = ModeProgram.__call__(self, command)
+        if p_status:
+            return p_status
+        if command.startswith('['):
+            ps = json.loads(command)
+            x0 = float(ps[0]['x'])
+            y0 = float(ps[0]['y'])
+            k = self.params['point_scale']
+            self.points = [(k * (float(p['x']) - x0), k * (float(p['y']) - y0)) for p in ps]
+            return "received " + str(len(ps)) + " points"
+        return None
 
     @property
     def speed(self):

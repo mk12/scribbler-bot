@@ -2,36 +2,49 @@
 Scribbler Bot | Team 22
 
 {content}
-<textarea id="console" rows="1" readonly></textarea>
 <section id="controls">
-	<section>
-		<label>Program</label>
-		<a id="btnavoid"
-		   onclick="switchProgram('avoid');">Avoid</a>
-		<a id="btntracie"
-		   class="disabled-button"
-		   onclick="switchProgram('tracie');">Tracie</a>
+	<textarea id="console" rows="1" readonly></textarea>
+	<section id="cbuttons">
+		<section>
+			<label>Program</label>
+			<a id="btnc-avoid"
+			onclick="switchProgram('avoid');">Avoid</a>
+			<a id="btnc-tracie"
+			class="disabled-button"
+			onclick="switchProgram('tracie');">Tracie</a>
+		</section>
+		<section>
+			<label>Control</label>
+			<a id="btnc-startstop" onclick="btnStartStop();">Start</a>
+			<a id="btnc-reset" onclick="btnReset();">Reset</a>
+		</section>
+		<section>
+			<label>Other</label>
+			<a id="btnc-beep" onclick="send('other:beep')">Beep</a>
+			<a id="btnc-info" onclick="send('other:info')">Info</a>
+		</section>
+		<section>
+			<label>Console</label>
+			<a id="btnc-clear" onclick="clearConsole();">Clear</a>
+			<a id="btnc-freescroll" onclick="btnFreeScroll();">Free</a>
+		</section>
+		<form onsubmit="setParameter(); return false;">
+			<label>Params</label>
+			<div><input id="c-param-name" type="text"></div>
+			<div><input id="c-param-value" type="text"></div>
+			<input type="submit" style="position: absolute; height: 0px; width: 0px; border: none; padding: 0px;" hidefocus="true" tabindex="-1">
+		</form>
 	</section>
-	<section>
-		<label>Control</label>
-		<a id="btnstartstop" onclick="btnStartStop();">Start</a>
-		<a id="btnreset" onclick="btnReset();">Reset</a>
-	</section>
-	<section>
-		<label>Other</label>
-		<a id="btnbeep" onclick="send('other:beep')">Beep</a>
-		<a id="btninfo" onclick="send('other:info')">Info</a>
-	</section>
-	<section>
-		<label>Console</label>
-		<a id="btnclear" onclick="clearConsole();">Clear</a>
-		<a id="btnfreescroll" onclick="btnFreeScroll();">Free</a>
-	</section>
-	<form onsubmit="setParameter(); return false;">
-		<label>Params</label>
-		<div><input id="param-name" type="text"></div>
-		<div><input id="param-value" type="text"></div>
-		<input type="submit" style="position: absolute; height: 0px; width: 0px; border: none; padding: 0px;" hidefocus="true" tabindex="-1">
-	</form>
+	<a id="btnc-toggleview" onclick="toggleView();">Draw</a>
 </section>
-<script src="/script.js"></script>
+<section id="drawing">
+	<canvas id="canvas" width="485" height="500"></canvas>
+	<section id="dbuttons">
+		<a id="btnd-undo" class="disabled-button" onclick="undoCanvas();">Undo</a>
+		<a id="btnd-redo" class="disabled-button" onclick="redoCanvas();">Redo</a>
+		<a id="btnd-clear" class="disabled-button" onclick="clearCanvas();">Clear</a>
+		<a id="btnd-toggleview" onclick="toggleView();">Done</a>
+	</section>
+</section>
+<script src="/drawing.js"></script>
+<script src="/controls.js"></script>

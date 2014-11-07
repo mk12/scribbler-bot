@@ -21,7 +21,10 @@ DESC = "Starts the Scribbler Bot server."
 PUBLIC = '../public'
 
 # Requests for any paths other than these will 404.
-WHITELIST = ['/', '/index.html', '/404.html', '/style.css', '/script.js']
+WHITELIST = [
+    '/', '/index.html', '/404.html', '/style.css',
+    '/controls.js', '/drawing.js'
+]
 
 # Configure the arguments.
 parser = argparse.ArgumentParser(description=DESC)

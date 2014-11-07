@@ -32,27 +32,38 @@ h1 > #team  { color: #d55; }
 	width: 100%;
 	min-width: 100%;
 	max-width: 100%;
-	line-height: 30pt;
+	line-height: 34pt;
 }
 
-#controls {
+#cbuttons {
 	display: table;
-	width: 485px;
+	width: 495px;
+	/* width: 100%; */
 	border-spacing: 10px;
 }
 
-#controls > section, #controls > form {
+#cbuttons > section, #cbuttons > form {
 	display: table-row;
 }
 
-#controls label {
+#cbuttons label {
 	display: table-cell;
 	text-align: left;
 }
 
-#controls a {
+#drawing {
+	display: none;
+}
+
+#canvas {
+	width: 100%;
+	height: 500px;
+	margin-bottom: 20px;
+	border: 1px solid #000;
+}
+
+a {
 	width: 140px;
-	display: table-cell;
 	font-size: 20pt;
 	border: 1px solid #aaa;
 	padding: 10px;
@@ -63,35 +74,52 @@ h1 > #team  { color: #d55; }
 	cursor: pointer;
 }
 
-#controls div {
-	display: table-cell;
+a#btnc-toggleview {
+	display: block;
+	width: 400px;
+	padding: none;
+	margin: 40px auto 0;
 }
 
-#controls div > input {
-	font-size: 20pt;
-	width: 156px;
-	height: 50px;
-}
-
-#controls a:hover {
+a:hover {
 	background: #000;
 	border-color: #000;
 	color: #fff;
 }
 
-#controls a:active {
+a:active {
 	background: #d55;
 }
 
-#controls .disabled-button {
+.disabled-button {
 	border: 1px solid #aaa;
 	color: #aaa;
 	background: #eee;
 	cursor: default;
 }
 
-#controls .disabled-button:hover {
+.disabled-button:hover {
 	border: 1px solid #aaa;
 	color: #aaa;
 	background: #eee;
+}
+
+#btn-toggleview {
+	position: fixed;
+	top: 0;
+	left: 0;
+}
+
+#cbuttons a {
+	display: table-cell;
+}
+
+#cbuttons div {
+	display: table-cell;
+}
+
+#cbuttons div > input {
+	font-size: 20pt;
+	width: 156px;
+	height: 50px;
 }

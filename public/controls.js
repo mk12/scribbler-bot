@@ -199,7 +199,7 @@ function toggleView() {
 		setVisible('controls', true);
 		activeView = 'controls';
 		removeEventListeners();
-		send(JSON.stringify(points));
+		send(JSON.stringify(convertPoints()));
 	}
 }
 

@@ -28,30 +28,40 @@ class Tracie(ModeProgram):
     """Tracie takes a set of points as input and draws the shape with a pen."""
 
     def __init__(self):
-        # TODO: how/when to set points?
-        self.points = [(0, 0), (10, 10), (20, 0), (0, 0)]
+        # self.new_points is the list of points that will be used next.
+        # It persists across resets.
+        self.new_points = []
         ModeProgram.__init__(self, 0)
         self.add_params(PARAM_DEFAULTS, PARAM_CODES)
 
     def reset(self):
         ModeProgram.reset(self)
-        self.index = 1
-        self.rot_dir = 1
-        self.go_for = 0
-        self.heading = self.next_point_angle()
+        self.points = None # path the the robot draws
+        self.index = 0 # index of point robot is going towards
+        self.heading = math.pi / 2 # the current heading, in standard position
+        self.rot_dir = 1 # 1 for counterclockwise, -1 for clockwise
+        self.go_for = 0 # the time duration of the robot's current action
+        # These two are only needed because the status method needs to access
+        # them after they have been set by the time setting methods.
+        self.delta_angle = 0
+        self.delta_pos = 0
 
     def __call__(self, command):
         p_status = ModeProgram.__call__(self, command)
         if p_status:
             return p_status
         if command.startswith('['):
-            ps = json.loads(command)
-            x0 = float(ps[0]['x'])
-            y0 = float(ps[0]['y'])
-            k = self.params['point_scale']
-            self.points = [(k * (float(p['x']) - x0), k * (float(p['y']) - y0)) for p in ps]
-            return "received " + str(len(ps)) + " points"
+            self.new_points = self.transform_points(json.loads(command))
+            return "received {} points".format(str(len(self.new_points)))
         return None
+
+    def transform_points(self, data):
+        """Transforms the point data by translating to make the first point the
+        origin and scaling by the appropriate parameter."""
+        x0 = float(data[0]['x'])
+        y0 = float(data[0]['y'])
+        k = self.params['point_scale']
+        return [(k*(float(p['x']) - x0), k*(float(p['y']) - y0)) for p in data]
 
     @property
     def speed(self):
@@ -70,10 +80,13 @@ class Tracie(ModeProgram):
         """Switches to the next mode and starts it."""
         if self.mode == 'halt':
             return
-        if self.mode == 0 or self.mode == 'rotate':
+        if self.mode == 0:
+            # Use the points that were sent most recently.
+            self.points = self.new_points[:]
+        if self.mode == 'rotate':
             self.set_drive_time()
             self.goto_mode('drive')
-        elif self.mode == 'drive':
+        elif self.mode == 0 or self.mode == 'drive':
             self.index += 1
             if self.index < len(self.points):
                 self.set_rotate_time()
@@ -86,30 +99,32 @@ class Tracie(ModeProgram):
         get to the next point."""
         x1, y1 = self.points[self.index -1]
         x2, y2 = self.points[self.index]
-        distance = math.sqrt(math.pow(y2 - y1, 2) + math.pow(x2 - x1, 2))
+        distance = dist_2d(x1, y1, x2, y2)
         self.go_for = self.dist_to_time(distance)
+        self.delta_pos = distance
 
     def set_rotate_time(self):
         """Sets the time duration for which the robot should rotate in order to
         be facing the next point."""
         new_heading = self.next_point_angle()
-        delta = new_heading - self.heading
+        delta = smallest_equivalent_angle(new_heading - self.heading)
         self.rot_dir = 1 if delta > 0 else -1
         self.go_for = self.radians_to_time(self.rot_dir * delta)
         self.heading = new_heading
+        self.delta_angle = delta
 
     def next_point_angle(self):
         """Calculates the angle that the line connecting the current point and
         the next point makes in standard position."""
         x1, y1 = self.points[self.index -1]
         x2, y2 = self.points[self.index]
-        return math.atan2(y2 - y1, x2 - x2)
+        return math.atan2(y2 - y1, x2 - x1)
 
     def move(self):
         """Makes Myro calls to move the robot according to the current mode.
         Called when the mode is begun and whenever the program is resumed."""
         ModeProgram.move(self)
-        if self.mode == 'halt':
+        if self.mode == 0 or self.mode == 'halt':
             myro.stop()
         if self.mode == 'drive':
             myro.forward(self.speed)
@@ -119,11 +134,38 @@ class Tracie(ModeProgram):
     def status(self):
         """Return the status message that should be displayed at the beginning
         of the current mode."""
-        # return STATUSES.get(self.mode, "bad mode" + str(self.mode))
-        return self.mode
+        if self.mode == 0:
+            return "impossible"
+        if self.mode == 'halt':
+            return "finished drawing"
+        if self.mode == 'drive':
+            return "drive {:.2f} cm".format(self.delta_pos)
+        if self.mode == 'rotate':
+            deg = 180 * self.delta_angle / math.pi
+            return "rotate {:.2f} degrees".format(deg)
+
+    def no_start(self):
+        if len(self.new_points) <= 1:
+            return "not enough points"
+        return False
 
     def loop(self):
         ModeProgram.loop(self)
         if self.is_mode_done():
             self.next_mode()
             return self.status()
+
+
+def dist_2d(x1, y1, x2, y2):
+    """Returns the distance between (x1,y1) and (x2,y2)."""
+    return math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
+
+
+def smallest_equivalent_angle(theta):
+    """Returns the smallest angle (positive or negative) that is equivalent to
+    `theta`. For example, 3/2*PI will be converted to -1/2*PI."""
+    while theta > math.pi:
+        theta -= 2 * math.pi
+    while theta < -math.pi:
+        theta += 2 * math.pi
+    return theta

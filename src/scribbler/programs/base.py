@@ -137,6 +137,11 @@ class ModeProgram(BaseProgram):
         BaseProgram.stop(self)
         self.pause_time = time()
 
+    def no_start(self):
+        """If the program cannot be started at this time, returns a string
+        providing a reason. Otherwise, returns False."""
+        return False
+
     def start(self):
         """Resumes the program and fixes the timer so that the time while the
         program was paused doesn't count towards the mode's time."""

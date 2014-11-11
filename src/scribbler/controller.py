@@ -84,6 +84,9 @@ class Controller(object):
             self.switch_program(prog)
             return "switched to {}".format(prog)
         if command == 'control:start':
+            reason = self.program.no_start()
+            if reason:
+                return reason
             if self.green:
                 return "already running"
             self.start()

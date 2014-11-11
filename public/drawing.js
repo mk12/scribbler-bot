@@ -51,6 +51,13 @@ function removeEventListeners() {
 	canvas.removeEventListener('mousemove', onMouseMove);
 }
 
+// Returns a converted points array with the origin in the bottom-left.
+function convertPoints() {
+	return points.map(function(p) {
+		return {x: p.x, y: canvas.style.height - p.y};
+	});
+}
+
 // Adds an action to action array to keep track of user's input.
 function addAction(a) {
 	// To forget about undone actions when a new action is performed.

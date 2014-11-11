@@ -19,49 +19,6 @@ h1 > #title { color: #000; }
 h1 > #bar   { color: #999; }
 h1 > #team  { color: #d55; }
 
-#console {
-	font-size: 20pt;
-	margin: 0 auto 50px;
-	padding: 8px 0;
-	border-top: 1px solid #000;
-	border-bottom: 1px solid #000;
-	border-left: none;
-	border-right: none;
-	background: #eee;
-	font-family: "Courier New";
-	width: 100%;
-	min-width: 100%;
-	max-width: 100%;
-	line-height: 34pt;
-}
-
-#cbuttons {
-	display: table;
-	width: 495px;
-	/* width: 100%; */
-	border-spacing: 10px;
-}
-
-#cbuttons > section, #cbuttons > form {
-	display: table-row;
-}
-
-#cbuttons label {
-	display: table-cell;
-	text-align: left;
-}
-
-#drawing {
-	display: none;
-}
-
-#canvas {
-	width: 100%;
-	height: 500px;
-	margin-bottom: 20px;
-	border: 1px solid #000;
-}
-
 a {
 	width: 140px;
 	font-size: 20pt;
@@ -72,13 +29,6 @@ a {
 	border-radius: 6px;
 	letter-spacing: 2px;
 	cursor: pointer;
-}
-
-a#btnc-toggleview {
-	display: block;
-	width: 400px;
-	padding: none;
-	margin: 40px auto 0;
 }
 
 a:hover {
@@ -104,17 +54,38 @@ a:active {
 	background: #eee;
 }
 
-#btn-toggleview {
-	position: fixed;
-	top: 0;
-	left: 0;
+#console {
+	font-size: 20pt;
+	margin: 0 auto 50px;
+	padding: 8px 0;
+	border-top: 1px solid #000;
+	border-bottom: 1px solid #000;
+	border-left: none;
+	border-right: none;
+	background: #eee;
+	font-family: "Courier New";
+	width: 100%;
+	min-width: 100%;
+	max-width: 100%;
+	line-height: 34pt;
 }
 
-#cbuttons a {
+#cbuttons {
+	display: table;
+	width: 495px;
+	border-spacing: 10px;
+}
+
+#cbuttons > section, #cbuttons > form {
+	display: table-row;
+}
+
+#cbuttons label {
 	display: table-cell;
+	text-align: left;
 }
 
-#cbuttons div {
+#cbuttons a, #cbuttons div {
 	display: table-cell;
 }
 
@@ -122,4 +93,22 @@ a:active {
 	font-size: 20pt;
 	width: 156px;
 	height: 50px;
+}
+
+#btnc-toggleview {
+	display: block;
+	width: 400px;
+	padding: none;
+	margin: 40px auto 0;
+}
+
+#drawing {
+	display: none;
+}
+
+#canvas {
+	width: 100%;
+	height: 500px;
+	margin-bottom: 20px;
+	border: 1px solid #000;
 }

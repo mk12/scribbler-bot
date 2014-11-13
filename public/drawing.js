@@ -86,9 +86,10 @@ function generatePoints() {
 
 // Connecting two given points.
 function connect(a, b, c, d) {
+	context.beginPath();
 	context.moveTo(a,b)
 	context.lineTo(c,d);
-	context.strokeStyle = '#000';
+	context.strokeStyle = 'black';
 	context.stroke();
 }
 
@@ -96,16 +97,17 @@ function connect(a, b, c, d) {
 function draw() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i = 0; i < points.length; i++) {
-		context.beginPath();
 		var x = points[i].x;
 		var y = points[i].y;
+		if (i < points.length - 1) {
+			var next_x = points[i+1].x;
+			var next_y = points[i+1].y;
+			connect(next_x, next_y, x, y);
+		}
+		context.fillStyle = (i == 0) ? 'red' : 'black';
+		context.beginPath();
 		context.arc(x, y, radius, 0, Math.PI * 2);
 		context.fill();
-		if (i > 0) {
-			var prev_x = points[i-1].x;
-			var prev_y = points[i-1].y;
-			connect(prev_x, prev_y, x, y);
-		}
 	}
 }
 

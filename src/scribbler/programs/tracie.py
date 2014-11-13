@@ -12,14 +12,16 @@ from scribbler.programs.base import ModeProgram
 # Short codes for the parameters of the program.
 PARAM_CODES = {
     'rs': 'rotation_speed',
-    'ps': 'point_scale'
+    'ps': 'point_scale',
+    'mr': 'min_rotation'
 }
 
 
 # Default values for the parameters of the program.
 PARAM_DEFAULTS = {
-    'rotation_speed': 0.5,
-    'point_scale': 0.02
+    'rotation_speed': 0.4, # from 0.0 to 1.0
+    'point_scale': 0.05, # cm/px
+    'min_rotation': 2 # deg
 }
 
 
@@ -90,7 +92,12 @@ class Tracie(ModeProgram):
             self.index += 1
             if self.index < len(self.points):
                 self.set_rotate_time()
-                self.goto_mode('rotate')
+                min_rad = self.params['min_rotation'] / 180.0 * math.pi
+                if abs(self.delta_angle) < min_rad:
+                    self.set_drive_time()
+                    self.goto_mode('drive')
+                else:
+                    self.goto_mode('rotate')
             else:
                 self.goto_mode('halt')
 

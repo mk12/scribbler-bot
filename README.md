@@ -37,7 +37,7 @@ When the Avoider program is selected, the Scribbler drives in a straight line un
 
 ## Tracie
 
-Tracie traces shapes. More info here later.
+Tracie traces shapes. The user draws a polygonal shape in the web application by adding and dragging vertices that are connected by straight lines. The Scribbler receives this data and replicates the drawing as best as it can.
 
 ## License
 

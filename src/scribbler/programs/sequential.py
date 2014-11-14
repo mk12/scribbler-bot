@@ -4,6 +4,7 @@
 
 import time.time
 
+from scribbler.util import average
 from scribbler.programs.base import BaseProgram, obstacle_average
 
 
@@ -34,7 +35,7 @@ class SeqProgram(BaseProgram):
             'cw': lambda t: myro.rotate(-self.speed)
         }
         self.conditions = {
-            'ir>': lambda v: obstacle_average() > v,
+            'ir>': lambda v: average(myro.getObstacle()) > v,
             'time': lambda t: self.time > t,
             'dist': lambda d: self.time > dist_to_time(d, self.speed),
             'angle': lambda a: self.time > angle_to_time(a, self.speed),

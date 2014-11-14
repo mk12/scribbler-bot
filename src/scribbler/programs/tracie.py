@@ -6,6 +6,7 @@ import json
 import math
 from time import time
 
+from scribbler.util import deg_to_rad, rad_to_deg, dist_2d, equiv_angle
 from scribbler.programs.base import ModeProgram
 
 
@@ -92,7 +93,7 @@ class Tracie(ModeProgram):
             self.index += 1
             if self.index < len(self.points):
                 self.set_rotate_time()
-                min_rad = self.params['min_rotation'] / 180.0 * math.pi
+                min_rad = deg_to_rad(self.params['min_rotation'])
                 if abs(self.delta_angle) < min_rad:
                     self.set_drive_time()
                     self.goto_mode('drive')
@@ -114,9 +115,9 @@ class Tracie(ModeProgram):
         """Sets the time duration for which the robot should rotate in order to
         be facing the next point."""
         new_heading = self.next_point_angle()
-        delta = smallest_equivalent_angle(new_heading - self.heading)
+        delta = equiv_angle(new_heading - self.heading)
         self.rot_dir = 1 if delta > 0 else -1
-        self.go_for = self.radians_to_time(self.rot_dir * delta)
+        self.go_for = self.angle_to_time(rad_to_deg(self.rot_dir * delta))
         self.heading = new_heading
         self.delta_angle = delta
 
@@ -148,8 +149,7 @@ class Tracie(ModeProgram):
         if self.mode == 'drive':
             return "drive {:.2f} cm".format(self.delta_pos)
         if self.mode == 'rotate':
-            deg = 180 * self.delta_angle / math.pi
-            return "rotate {:.2f} degrees".format(deg)
+            return "rotate {:.2f} degrees".format(rad_to_deg(self.delta_angle))
 
     def no_start(self):
         if len(self.new_points) <= 1:
@@ -161,18 +161,3 @@ class Tracie(ModeProgram):
         if self.is_mode_done():
             self.next_mode()
             return self.status()
-
-
-def dist_2d(x1, y1, x2, y2):
-    """Returns the distance between (x1,y1) and (x2,y2)."""
-    return math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
-
-
-def smallest_equivalent_angle(theta):
-    """Returns the smallest angle (positive or negative) that is equivalent to
-    `theta`. For example, 3/2*PI will be converted to -1/2*PI."""
-    while theta > math.pi:
-        theta -= 2 * math.pi
-    while theta < -math.pi:
-        theta += 2 * math.pi
-    return theta

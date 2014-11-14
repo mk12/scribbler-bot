@@ -2,7 +2,8 @@
 
 """Makes the Scribbler Bot drive around an obstacle."""
 
-from scribbler.programs.base import ModeProgram, obstacle_average
+from scribbler.util import average
+from scribbler.programs.base import ModeProgram
 
 
 # Short codes for the parameters of the program.
@@ -207,3 +208,8 @@ class Avoider(ModeProgram):
                 self.heading = 'in'
             elif self.heading == 'out':
                 self.heading = 'up'
+
+
+def obstacle_average():
+    """Returns the average of the three obstacle sensor readings."""
+    return average(myro.getObstacle())

@@ -62,13 +62,13 @@ class BaseProgram(object):
         order to rotate by `angle` degrees."""
         return self.params['angle_to_time'] * angle / self.speed
 
-    def radians_to_time(self, theta):
-        """Like `angle_to_time`, but the angle is in radians."""
-        return self.angle_to_time(180 * theta / math.pi)
-
     def time_to_dist(self, time):
         """The inverse of `dist_to_time`."""
         return self.speed * time / self.params['dist_to_time']
+
+    def time_to_angle(self, time):
+        """The inverse of `angle_to_time`."""
+        return self.speed * time / self.params['angle_to_time']
 
     # Subclasses should override the following methods (and call super).
     # `__call__` must return a status, and `loop` should sometimes.
@@ -198,9 +198,3 @@ class ModeProgram(BaseProgram):
     def end_mode(self):
         """Called when the mode is about to switch."""
         pass
-
-
-def obstacle_average():
-    """Returns the average of the three obstacle sensor readings."""
-    readings = myro.getObstacle()
-    return sum(readings) / float(len(readings))

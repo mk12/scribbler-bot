@@ -74,6 +74,7 @@ function switchProgram(name) {
 	enableOtherPrograms(name);
 	setStartStop(true);
 	setEnabled('btnc-reset', false);
+	setVisible('btnc-toggleview', name == 'tracie');
 	send('program:' + name);
 	currentProgram = name;
 }
@@ -156,6 +157,7 @@ function synchronize() {
 		enableOtherPrograms(sProgram);
 		setStartStop(!sRunning);
 		setEnabled('btnc-reset', sCanReset);
+		setVisible('btnc-toggleview', sProgram == 'tracie');
 		currentProgram = sProgram;
 		running = sRunning;
 	}, function() {
@@ -199,7 +201,11 @@ function toggleView() {
 		setVisible('controls', true);
 		activeView = 'controls';
 		removeEventListeners();
-		send(JSON.stringify(convertPoints()));
+		if (enoughPoints()) {
+			send(JSON.stringify(convertPoints()));
+		} else {
+			addToConsole("not enough points");
+		}
 	}
 }
 

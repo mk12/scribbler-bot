@@ -51,6 +51,11 @@ function removeEventListeners() {
 	canvas.removeEventListener('mousemove', onMouseMove);
 }
 
+// Returns true if there are enough points to send.
+function enoughPoints() {
+	return points.length > 1;
+}
+
 // Returns a converted points array with the origin in the bottom-left.
 function convertPoints() {
 	return points.map(function(p) {

@@ -38,12 +38,20 @@ Scribbler Bot | Team 22
 	<a id="btnc-toggleview" onclick="toggleView();">Draw</a>
 </section>
 <section id="drawing">
-	<canvas id="canvas" width="485" height="500"></canvas>
+	<canvas id="canvas" width="485" height="485"></canvas>
 	<section id="dbuttons">
-		<a id="btnd-undo" class="disabled-button" onclick="undoCanvas();">Undo</a>
-		<a id="btnd-redo" class="disabled-button" onclick="redoCanvas();">Redo</a>
-		<a id="btnd-clear" class="disabled-button" onclick="clearCanvas();">Clear</a>
-		<a id="btnd-toggleview" onclick="toggleView();">Done</a>
+		<section>
+			<a id="btnd-undo" class="disabled-button" onclick="undoCanvas();">Undo</a>
+			<a id="btnd-redo" class="disabled-button" onclick="redoCanvas();">Redo</a>
+			<a id="btnd-clear" class="disabled-button" onclick="clearCanvas();">Clear</a>
+			<a id="btnd-del" onclick="toggleDelete();">Del</a>
+		</section>
+		<section>
+			<a id="btnd-save" onclick="">Save</a>
+			<a id="btnd-load" onclick="">Load</a>
+			<a id="btnd-trace" onclick="">Trace</a>
+			<a id="btnd-toggleview" onclick="toggleView();">Done</a>
+		</section>
 	</section>
 </section>
 <script src="/drawing.js"></script>

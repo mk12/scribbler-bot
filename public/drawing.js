@@ -9,6 +9,7 @@ var clickRadius = 15;
 var canvas, context;
 var index;
 var allow = false;
+var delMode = false;
 
 // Sets up the canvas and context global variables.
 function setupCanvas() {
@@ -73,6 +74,19 @@ function addAction(a) {
 	actionIndex++;
 }
 
+// Regenerates points, draws them, and updates the button states.
+function render() {
+	generatePoints();
+	draw();
+	setButtonStates();
+}
+
+// Performs an action and then renders the app.
+function perform(a) {
+	addAction(a);
+	render();
+}
+
 // Perform a task: connecting dots, dragging dots, or clear.
 function generatePoints() {
 	points = [];
@@ -85,15 +99,25 @@ function generatePoints() {
 			points[a.i].y = a.y;
 		} else if (a.kind == 'clear') {
 			points = [];
+		} else if (a.kind == 'del') {
+			points.splice(a.i, 1);
 		}
 	}
 }
 
-// Connecting two given points.
-function connect(a, b, c, d) {
+// Draws a dot centred at p, optionally filled with red (otherwise black).
+function drawDot(p, fillRed) {
+	context.fillStyle = fillRed? 'red' : 'black';
 	context.beginPath();
-	context.moveTo(a,b)
-	context.lineTo(c,d);
+	context.arc(p.x, p.y, radius, 0, Math.PI * 2);
+	context.fill();
+}
+
+// Connecting two given points.
+function drawLine(p1, p2) {
+	context.beginPath();
+	context.moveTo(p1.x, p1.y)
+	context.lineTo(p2.x, p2.y);
 	context.strokeStyle = 'black';
 	context.stroke();
 }
@@ -102,17 +126,10 @@ function connect(a, b, c, d) {
 function draw() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i = 0; i < points.length; i++) {
-		var x = points[i].x;
-		var y = points[i].y;
 		if (i < points.length - 1) {
-			var next_x = points[i+1].x;
-			var next_y = points[i+1].y;
-			connect(next_x, next_y, x, y);
+			drawLine(points[i], points[i+1]);
 		}
-		context.fillStyle = (i == 0) ? 'red' : 'black';
-		context.beginPath();
-		context.arc(x, y, radius, 0, Math.PI * 2);
-		context.fill();
+		drawDot(points[i], i == 0);
 	}
 }
 
@@ -122,7 +139,7 @@ function distanceSquared(x1, y1, x2, y2) {
 }
 
 // Check if the position where mouse is clicked contains a dot
-function thereIsPoint(pos){
+function isPointAt(pos){
 	index = 0;
 	var p = canvasPosition(pos);
 	var rad = clickRadius * clickRadius;
@@ -140,35 +157,27 @@ function setButtonStates() {
 	setEnabled('btnd-undo', actionIndex != 0);
 	setEnabled('btnd-redo', actionIndex < actions.length);
 	setEnabled('btnd-clear', points.length > 0);
+	setActive('btnd-del', delMode);
 }
 
-// Erasing the work on the canvas.
+// Clears all points from the canvas.
 function clearCanvas() {
-	addAction({kind: 'clear'});
-	generatePoints();
-	draw();
-	setButtonStates();
+	perform({kind: 'clear'});
 }
 
-// Undo the move user made.
+// Undos the user's most recent action.
 function undoCanvas() {
-	if (actionIndex == 0) {
+	if (actionIndex == 0)
 		return;
-	}
 	actionIndex--;
-	generatePoints();
-	draw();
-	setButtonStates();
+	render();
 }
 
 function redoCanvas() {
-	if (actionIndex == actions.length) {
+	if (actionIndex == actions.length)
 		return;
-	}
 	actionIndex++;
-	generatePoints();
-	draw();
-	setButtonStates();
+	render();
 }
 
 // Converts a client mouse position to canvas coordinates.
@@ -180,33 +189,39 @@ function canvasPosition(pos) {
 }
 
 function onMouseDown(pos) {
-	var p = canvasPosition(pos);
-	if (!thereIsPoint (pos)) {
-		addAction({kind: 'point', x: p.x, y: p.y});
-		generatePoints();
-		draw();
-		setButtonStates();
-	} else if (thereIsPoint (pos) ){
-		allow = true;
+	if (!isPointAt(pos)) {
+		if (!delMode) {
+			var p = canvasPosition(pos);
+			perform({kind: 'point', x: p.x, y: p.y});
+		}
+	} else if (isPointAt(pos)){
+		if (delMode) {
+			perform({kind: 'del', i: index});
+		} else {
+			allow = true;
+		}
 	}
 }
 
 function onMouseUp(pos) {
+	if (!allow || delMode)
+		return;
 	var p = canvasPosition(pos);
-	if (allow) {
-		addAction({kind: 'move', i: index, x: p.x, y: p.y});
-		generatePoints();
-		draw();
-		setButtonStates();
-	}
+	perform({kind: 'move', i: index, x: p.x, y: p.y});
 	allow = false;
 }
 
 function onMouseMove(pos) {
+	if (!allow || delMode)
+		return;
 	var p = canvasPosition(pos);
-	if (allow) {
-		points[index].x = p.x;
-		points[index].y = p.y;
-		draw();
-	}
+	points[index].x = p.x;
+	points[index].y = p.y;
+	draw();
+}
+
+// Toggles the point adding/deleting function.
+function toggleDelete() {
+	delMode = !delMode;
+	setActive('btnd-del', delMode);
 }

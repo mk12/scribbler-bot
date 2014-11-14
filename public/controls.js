@@ -40,6 +40,11 @@ function setEnabled(id, yes) {
 	document.getElementById(id).className = yes? '' : 'disabled-button';
 }
 
+// Activate or disactivate a button by its element ID.
+function setActive(id, yes) {
+	document.getElementById(id).className = yes? 'active' : '';
+}
+
 // Toggles the auto-scrolling whenever a new line is added to the console.
 function btnFreeScroll() {
 	btn = document.getElementById('btnc-freescroll');

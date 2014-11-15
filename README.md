@@ -1,6 +1,6 @@
 # Scribbler Bot
 
-Scribbler Bot is a project that we, group 22, are developing for SE 101 in 1A Software Engineering at Waterloo. It is written in Python and uses the [Myro][1] library to control a robot. We are organizing tasks for the project with [Trello boards][2].
+Scribbler Bot is a project that we, group 22, are developing for SE 101 in 1A Software Engineering at Waterloo. It is written mainly in Python and uses the [Myro][1] library to control a robot. We are organizing tasks for the project with [Trello boards][2].
 
 [1]: http://wiki.roboteducation.org/Myro_Reference_Manual
 [2]: https://trello.com/scribbler22
@@ -21,15 +21,11 @@ Now, you must start the server:
 python src/main.py
 ```
 
-Use the `-h` flag to see what other options there are.
+Use the `-h` flag to see what other options there are. A particularly useful options is `-d`: this makes the server use a dummy implementation of Myro, so you can test the web application without having the robot.
 
 ## Client
 
-The web browser should have opened to `http://localhost:8080` automatically. You control Scribbler Bot via this web app. By clicking the buttons, you can choose a program, start/stop/reset the program, adjust the robot's speed, make it beep, display some information about the robot, clear the console, and toggle automatic scrolling of the console.
-
-## Testing
-
-If you want to test the project but you don't have access to the robot, replace the `import myro` lines with `import nomyro as myro`. This will provide dummy implementations of the Myro functions, so the program will run (but do nothing).
+The web browser should have opened to `http://localhost:8080` automatically. You control Scribbler Bot via this web app. By clicking the buttons, you can choose a program, start/stop/reset the program, adjust the robot's speed, make it beep, display some information about the robot, clear the console, toggle automatic scrolling of the console, and view and set parameters of the program.
 
 ## Object avoidance
 

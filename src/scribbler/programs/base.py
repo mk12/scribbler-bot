@@ -37,6 +37,7 @@ class BaseProgram(object):
 
     def __init__(self):
         """Creates a new base program."""
+        self.defaults = PARAM_DEFAULTS.copy()
         self.params = PARAM_DEFAULTS.copy()
         self.codes = PARAM_CODES.copy()
 
@@ -44,6 +45,7 @@ class BaseProgram(object):
         """Adds parameters to the program given their default values and their
         short codes, which must be dictionaries similar to PARAM_CODES and
         PARAM_DEFAULTS (defined above)."""
+        self.defaults.update(defaults)
         self.params.update(defaults)
         self.codes.update(codes)
 
@@ -89,13 +91,17 @@ class BaseProgram(object):
             # Return the value of the parameter.
             if value == "" or value == "?":
                 return name + " = " + str(self.params[name])
-            try:
-                n = float(value)
-            except ValueError:
-                return "NaN: " + value
+            # Reset the parameter to its default.
+            if "default".startswith(value):
+                n = self.defaults[name]
+            else:
+                try:
+                    n = float(value)
+                except ValueError:
+                    return "NaN: " + value
             # Set the parameter to the new value.
             self.params[name] = n
-            return name + " = " + value
+            return name + " = " + str(n)
         return None
 
     def start(self):

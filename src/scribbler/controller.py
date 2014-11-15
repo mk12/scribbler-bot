@@ -2,6 +2,8 @@
 
 """Mediates between the server and the currently executing program."""
 
+import json
+
 from gevent import Greenlet, sleep
 from gevent.queue import Queue
 
@@ -77,6 +79,8 @@ class Controller(object):
             running = bool(self.green)
             can_reset = self.can_reset
             return "{} {} {}".format(pid, running, can_reset)
+        if command == 'short:param-help':
+            return json.dumps(self.program.codes)
         if command == 'long:status':
             return self.messages.get()
         if command.startswith(PROGRAM_PREFIX):

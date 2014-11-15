@@ -21,7 +21,7 @@ Now, you must start the server:
 python src/main.py
 ```
 
-Use the `-h` flag to see what other options there are. A particularly useful options is `-d`: this makes the server use a dummy implementation of Myro, so you can test the web application without having the robot.
+Use the `-h` flag to see what other options there are. A particularly useful option is `-d`: this makes the server use a dummy implementation of Myro, allowing you to test the server and web application without the Scribbler Bot.
 
 ## Client
 

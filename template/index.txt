@@ -28,14 +28,23 @@ Scribbler Bot | Team 22
 			<a id="btnc-clear" onclick="clearConsole();">Clear</a>
 			<a id="btnc-freescroll" onclick="btnFreeScroll();">Free</a>
 		</section>
-		<form onsubmit="setParameter(); return false;">
+		<section>
 			<label>Params</label>
+			<a id="btnc-help" onclick="switchToView('param-help');">Help</a>
+			<a id="btnc-calib" onclick="">Calib</a>
+		</section>
+		<form onsubmit="setParameter(); return false;">
+			<label>Value</label>
 			<div><input id="c-param-name" type="text"></div>
 			<div><input id="c-param-value" type="text"></div>
 			<input type="submit" style="position: absolute; height: 0px; width: 0px; border: none; padding: 0px;" hidefocus="true" tabindex="-1">
 		</form>
 	</section>
-	<a id="btnc-toggleview" onclick="toggleView();">Draw</a>
+	<a id="btnc-draw" onclick="switchToView('drawing');">Draw</a>
+</section>
+<section id="param-help">
+	<dl id="pdefinitions"></dl>
+	<a id="btnp-back" onclick="switchToView('controls');">Back</a>
 </section>
 <section id="drawing">
 	<canvas id="canvas" width="485" height="485"></canvas>
@@ -50,7 +59,7 @@ Scribbler Bot | Team 22
 			<a id="btnd-save" onclick="saveCanvas();">Save</a>
 			<a id="btnd-load" onclick="loadCanvas();">Load</a>
 			<a id="btnd-trace" onclick="">Trace</a>
-			<a id="btnd-toggleview" onclick="toggleView();">Done</a>
+			<a id="btnd-done" onclick="switchToView('controls');">Done</a>
 		</section>
 	</section>
 </section>

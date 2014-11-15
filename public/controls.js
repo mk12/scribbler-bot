@@ -79,7 +79,7 @@ function switchProgram(name) {
 	enableOtherPrograms(name);
 	setStartStop(true);
 	setEnabled('btnc-reset', false);
-	setVisible('btnc-toggleview', name == 'tracie');
+	setVisible('btnc-draw', name == 'tracie');
 	send('program:' + name);
 	currentProgram = name;
 }
@@ -162,7 +162,7 @@ function synchronize() {
 		enableOtherPrograms(sProgram);
 		setStartStop(!sRunning);
 		setEnabled('btnc-reset', sCanReset);
-		setVisible('btnc-toggleview', sProgram == 'tracie');
+		setVisible('btnc-draw', sProgram == 'tracie');
 		currentProgram = sProgram;
 		running = sRunning;
 	}, function() {
@@ -186,32 +186,57 @@ function post(data, onreceive, ontimeout) {
 	r.send(data);
 }
 
-// The currently active view, either the controls or the drawing view.
-var activeView = 'controls';
+// Keep track of the currently visible view.
+var currentView = 'controls';
+var allViews = ['controls', 'param-help', 'drawing'];
 
 // Sets the visibility of the element indicated by the given identifier.
 function setVisible(id, visible) {
 	document.getElementById(id).style.display = visible? 'block' : 'none';
 }
 
-// Toggles the currently visible view (the controls view or the drawing canvas).
-function toggleView() {
-	if (activeView == 'controls') {
-		setVisible('controls', false);
-		setVisible('drawing', true);
-		activeView = 'drawing';
-		addEventListeners();
-	} else {
-		setVisible('drawing', false);
-		setVisible('controls', true);
-		activeView = 'controls';
-		removeEventListeners();
-		if (enoughPoints()) {
-			send(JSON.stringify(convertPoints()));
-		} else {
-			addToConsole("not enough points");
+// Shows the named view and hides the others.
+function showView(name) {
+	setVisible(name, true);
+	for (var i = 0, len = allViews.length; i < len; i++) {
+		if (allViews[i] != name) {
+			setVisible(allViews[i], false);
 		}
 	}
+}
+
+// Switches to the named view.
+function switchToView(view) {
+	if (view == 'controls') {
+		if (currentView == 'drawing') {
+			removeEventListeners();
+			if (enoughPoints()) {
+				send(JSON.stringify(convertPoints()));
+			} else {
+				addToConsole("not enough points");
+			}
+		}
+	} else if (view == 'param-help') {
+		generateParamHelp();
+	} else if (view == 'drawing') {
+		addEventListeners();
+	}
+	showView(view);
+	currentView = view;
+}
+
+// Generates the help information for the current program and inserts the HTML
+// into the param-help section.
+function generateParamHelp() {
+	post('short:param-help', function(data) {
+		var codes = JSON.parse(data);
+		var html = Object.keys(codes).sort().map(function(sc) {
+			return '<div><dt>' + sc + '</dt><dd>' + codes[sc] + '</dd></div>';
+		}).join('');
+		document.getElementById('pdefinitions').innerHTML = html;
+	}, function() {
+		addToConsole("help fetch timed out");
+	});
 }
 
 window.onload = function() {
@@ -222,7 +247,6 @@ window.onload = function() {
 	// Begin the long-polling.
 	updateStatus();
 	// Ensure that only one page is showing.
-	setVisible('controls', true);
-	setVisible('drawing', false);
+	showView(currentView);
 	setupCanvas();
 }

@@ -99,15 +99,37 @@ a:active, a.active {
 	height: 50px;
 }
 
-#btnc-toggleview {
+#btnc-draw, #btnp-back {
 	display: block;
 	width: 400px;
 	padding: none;
 	margin: 40px auto 0;
 }
 
-#drawing {
+#param-help, #drawing {
 	display: none;
+}
+
+dl {
+	display: table;
+	border-spacing: 10px;
+}
+
+dl > div {
+	display: table-row;
+}
+
+dt {
+	font-weight: bold;
+	padding-right: 25px;
+	display: table-cell;
+	text-align: right;
+}
+
+dd {
+	font-family: 'Courier New';
+	display: table-cell;
+	text-align: left;
 }
 
 #dbuttons {

@@ -101,6 +101,8 @@ function generatePoints() {
 			points = [];
 		} else if (a.kind == 'del') {
 			points.splice(a.i, 1);
+		} else if (a.kind == 'load') {
+			points = a.points.slice();
 		}
 	}
 }
@@ -224,4 +226,49 @@ function onMouseMove(pos) {
 function toggleDelete() {
 	delMode = !delMode;
 	setActive('btnd-del', delMode);
+}
+
+// Returns the points array serialized in a string.
+function serializePoints() {
+	return JSON.stringify([].concat.apply([], points.map(function(p) {
+		return [p.x, p.y];
+	})));
+}
+
+// Deserializes the points string, and returns an array of (x,y) points. Returns
+// false if the data could not be parsed.
+function deserializePoints(str) {
+	try {
+		var data = JSON.parse(str);
+	} catch (e) {
+		return false;
+	}
+	var len = data.length;
+	if (!(data instanceof Array) || len % 2 != 0)
+		return false;
+	ps = [];
+	for (var i = 0; i < len; i += 2) {
+		var x = parseInt(data[i]);
+		var y = parseInt(data[i+1]);
+		if (isNaN(x) || isNaN(y))
+			return false;
+		ps.push({x: x, y: y});
+	}
+	return ps;
+}
+
+// Displays the serialized points data in a window for the user to copy.
+function saveCanvas() {
+	prompt("Copy the data to save your points.", serializePoints());
+}
+
+// Prompts the user to paste previously saved data, and loads it.
+function loadCanvas() {
+	var str = prompt("Paste the save data.");
+	var ps = deserializePoints(str);
+	if (ps === false) {
+		alert("The data you entered was invalid.");
+	} else {
+		perform({kind: 'load', points: ps});
+	}
 }

@@ -47,8 +47,8 @@ Scribbler Bot | Team 22
 			<a id="btnd-del" onclick="toggleDelete();">Del</a>
 		</section>
 		<section>
-			<a id="btnd-save" onclick="">Save</a>
-			<a id="btnd-load" onclick="">Load</a>
+			<a id="btnd-save" onclick="saveCanvas();">Save</a>
+			<a id="btnd-load" onclick="loadCanvas();">Load</a>
 			<a id="btnd-trace" onclick="">Trace</a>
 			<a id="btnd-toggleview" onclick="toggleView();">Done</a>
 		</section>

@@ -113,6 +113,11 @@ a:active, a.active {
 dl {
 	display: table;
 	border-spacing: 10px;
+	margin: 0 auto;
+	font-family: "Courier New";
+	background: #eee;
+	border-top: 1px solid #000;
+	border-bottom: 1px solid #000;
 }
 
 dl > div {
@@ -121,13 +126,12 @@ dl > div {
 
 dt {
 	font-weight: bold;
-	padding-right: 25px;
+	padding-right: 15px;
 	display: table-cell;
 	text-align: right;
 }
 
 dd {
-	font-family: 'Courier New';
 	display: table-cell;
 	text-align: left;
 }

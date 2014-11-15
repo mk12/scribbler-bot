@@ -10,6 +10,7 @@ var canvas, context;
 var index;
 var allow = false;
 var delMode = false;
+var traceMode = false;
 
 // Sets up the canvas and context global variables.
 function setupCanvas() {
@@ -50,6 +51,25 @@ function removeEventListeners() {
 	canvas.removeEventListener('mousedown', onMouseDown);
 	canvas.removeEventListener('mouseup', onMouseUp);
 	canvas.removeEventListener('mousemove', onMouseMove);
+}
+
+// Map button identifiers to action functions.
+var btnActions = {
+	'undo': undoCanvas,
+	'redo': redoCanvas,
+	'clear': clearCanvas,
+	'del': toggleDelete,
+	'save': saveCanvas,
+	'load': loadCanvas,
+	'trace': toggleTrace
+}
+
+// Performs the action that should be taken for the button with the given id
+// (without the btnd- prefix), checking to make sure it is enabled first.
+function dbtnAction(id) {
+	if (isEnabled('btnd-' + id)) {
+		btnActions[id]();
+	}
 }
 
 // Returns true if there are enough points to send.
@@ -271,4 +291,11 @@ function loadCanvas() {
 	} else {
 		perform({kind: 'load', points: ps});
 	}
+}
+
+// Toggles the path tracing mode. In trace mode, the robot's position is shown
+// on the screen so that the user can track its progress (instead of editing).
+function toggleTrace() {
+	traceMode = !traceMode;
+	setActive('btnd-trace', traceMode);
 }

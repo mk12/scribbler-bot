@@ -13,7 +13,9 @@ var scrolling = true;
 // Adds a line of text to the console, and (optionally) scrolls down to it.
 function addToConsole(text) {
 	var console = document.getElementById('console');
-	if (consoleLines > 0) {
+	if (consoleLines == 0) {
+		setEnabled('btnc-clear', true);
+	} else {
 		console.innerHTML += '\n';
 	}
 	console.innerHTML += " [" + consoleLines + "] " + text;
@@ -25,9 +27,12 @@ function addToConsole(text) {
 
 // Clears the console and resets the counter.
 function clearConsole() {
-	var console = document.getElementById('console');
-	console.innerHTML = "";
-	consoleLines = 0;
+	if (isEnabled('btnc-clear')) {
+		var console = document.getElementById('console');
+		console.innerHTML = "";
+		consoleLines = 0;
+		setEnabled('btnc-clear', false);
+	}
 }
 
 // Returns true if the button is enabled and false otherwise.

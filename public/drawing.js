@@ -265,8 +265,8 @@ function redoCanvas() {
 // Converts a client mouse position to canvas coordinates.
 function canvasPosition(pos) {
 	return {
-		x: pos.clientX - canvas.offsetLeft,
-		y: pos.clientY - canvas.offsetTop
+		x: pos.pageX - canvas.offsetLeft,
+		y: pos.pageY - canvas.offsetTop
 	};
 }
 

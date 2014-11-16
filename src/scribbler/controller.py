@@ -22,12 +22,14 @@ PROGRAM_PREFIX = 'program:'
 # Amount of time to sleep between main loop iterations (seconds).
 LOOP_DELAY = 0.01
 
-# Timeout for status queue long-polling (seconds). This should be slightly
-# larger than `ajaxTimeout` in `controls.js`, so that the client times out just
-# before the server gives up. (Alternatively, we could do it the other way
-# around, so that the client receives the empty, non-200 response just before it
-# is about to give up. I don't think either option has any advantages.)
-STATUS_POLL_TIMEOUT = 31
+# Amount of time to delay before starting (seconds), to ensure that the starting
+# message gets sent before the program's first status update.
+START_DELAY = 0.1
+
+# Timeout for status queue long-polling (seconds). This should be less than
+# `ajaxTimeout` in `controls.js`, so that the server times out just before the
+# client gives up, and the server responds with a non-200 status.
+STATUS_POLL_TIMEOUT = 25
 
 
 class Controller(object):
@@ -46,7 +48,7 @@ class Controller(object):
     def start(self):
         """Starts (or resumes) the execution of the program."""
         self.green = Greenlet(self.main_loop)
-        self.green.start()
+        self.green.start_later(START_DELAY)
         self.program.start()
         self.can_reset = True
 
@@ -73,10 +75,10 @@ class Controller(object):
         """Runs the program's loop method continously, collecting any returned
         messages into the messages queue."""
         while True:
-            sleep(LOOP_DELAY)
             msg = self.program.loop()
             if msg:
                 self.messages.put(msg)
+            sleep(LOOP_DELAY)
 
     def __call__(self, command):
         """Accepts a command and either performs the desired action or passes
@@ -90,9 +92,10 @@ class Controller(object):
             return json.dumps(self.program.codes)
         if command == 'long:status':
             try:
-                return self.messages.get(timeout=STATUS_POLL_TIMEOUT)
+                msg = self.messages.get(timeout=STATUS_POLL_TIMEOUT)
             except Empty:
                 return None
+            return msg
         if command.startswith(PROGRAM_PREFIX):
             prog = command[len(PROGRAM_PREFIX):]
             self.switch_program(prog)

@@ -190,7 +190,10 @@ function post(data, onreceive, onfail, ontimeout) {
 		if (r.readyState == 4) {
 			if (r.status == 200) {
 				onreceive(r.responseText);
-			} else {
+			} else if (r.status != 0) {
+				// For some reason, if the request times out, it calles the
+				// `ontimeout` function but also completes the request with a
+				// status of zero. So let's ignore that.
 				onfail(r.status);
 			}
 		}

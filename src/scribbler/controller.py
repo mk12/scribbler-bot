@@ -22,6 +22,10 @@ PROGRAM_PREFIX = 'program:'
 # Amount of time to sleep between main loop iterations (seconds).
 LOOP_DELAY = 0.01
 
+# Timeout for status queue long-polling (seconds). This should match
+# `ajaxTimeout` in `controls.js`.
+STATUS_POLL_TIMEOUT = 30
+
 
 class Controller(object):
 
@@ -82,7 +86,7 @@ class Controller(object):
         if command == 'short:param-help':
             return json.dumps(self.program.codes)
         if command == 'long:status':
-            return self.messages.get()
+            return self.messages.get(timeout=STATUS_POLL_TIMEOUT)
         if command.startswith(PROGRAM_PREFIX):
             prog = command[len(PROGRAM_PREFIX):]
             self.switch_program(prog)

@@ -170,6 +170,9 @@ function synchronize() {
 		setVisible('btnc-draw', sProgram == 'tracie');
 		currentProgram = sProgram;
 		running = sRunning;
+		if (traceMode && !running) {
+			toggleTrace();
+		}
 	}, function() {
 		addToConsole("sync timed out");
 	})
@@ -215,10 +218,14 @@ function switchToView(view) {
 	if (view == 'controls') {
 		if (currentView == 'drawing') {
 			removeEventListeners();
-			if (enoughPoints()) {
-				send(JSON.stringify(convertPoints()));
-			} else {
-				addToConsole("not enough points");
+			// Don't send the points if it's tracing.
+			if (!traceMode) {
+				if (enoughPoints()) {
+					tracePoints = deepCopy(points);
+					send(JSON.stringify(convertPoints()));
+				} else {
+					addToConsole("not enough points");
+				}
 			}
 		}
 	} else if (view == 'param-help') {

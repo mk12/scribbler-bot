@@ -5,12 +5,13 @@ var points = [];
 var actions = [];
 var actionIndex = 0;
 var radius = 5;
-var clickRadius = 15;
+var clickRadius = 10;
 var canvas, context;
 var index;
 var allow = false;
 var delMode = false;
 var traceMode = false;
+var tracePoints = [];
 
 // Sets up the canvas and context global variables.
 function setupCanvas() {
@@ -51,6 +52,15 @@ function removeEventListeners() {
 	canvas.removeEventListener('mousedown', onMouseDown);
 	canvas.removeEventListener('mouseup', onMouseUp);
 	canvas.removeEventListener('mousemove', onMouseMove);
+}
+
+// Creates and returns a deep copy of a points-like array.
+function deepCopy(ps) {
+	copy = [];
+	for (var i = 0, len = ps.length; i < len; i++) {
+		copy[i] = {x: ps[i].x, y: ps[i].y};
+	}
+	return copy;
 }
 
 // Map button identifiers to action functions.
@@ -109,6 +119,10 @@ function perform(a) {
 
 // Perform a task: connecting dots, dragging dots, or clear.
 function generatePoints() {
+	if (traceMode) {
+		points = tracePoints;
+		return;
+	}
 	points = [];
 	for (var i = 0; i < actionIndex; i++) {
 		var a = actions[i];
@@ -122,7 +136,7 @@ function generatePoints() {
 		} else if (a.kind == 'del') {
 			points.splice(a.i, 1);
 		} else if (a.kind == 'load') {
-			points = a.points.slice();
+			points = deepCopy(a.points);
 		}
 	}
 }
@@ -146,12 +160,18 @@ function drawLine(p1, p2) {
 
 // Draws an object on a canvas.
 function draw() {
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	for (var i = 0; i < points.length; i++) {
-		if (i < points.length - 1) {
-			drawLine(points[i], points[i+1]);
+	if (traceMode) {
+		context.fillStyle = '#eee';
+		context.fillRect(0, 0, canvas.width, canvas.height);
+	} else {
+		context.clearRect(0, 0, canvas.width, canvas.height);
+	}
+	var p = traceMode? tracePoints : points;
+	for (var i = 0; i < p.length; i++) {
+		if (i < p.length - 1) {
+			drawLine(p[i], p[i+1]);
 		}
-		drawDot(points[i], i == 0);
+		drawDot(p[i], i == 0);
 	}
 }
 
@@ -164,10 +184,10 @@ function distanceSquared(x1, y1, x2, y2) {
 function isPointAt(pos){
 	index = 0;
 	var p = canvasPosition(pos);
-	var rad = clickRadius * clickRadius;
+	var radSquared = clickRadius * clickRadius;
 	while (index < points.length) {
 		var point = points[index];
-		if (distanceSquared(p.x, p.y, point.x, point.y) < rad)
+		if (distanceSquared(p.x, p.y, point.x, point.y) < radSquared)
 			return true;
 		index++;
 	}
@@ -176,10 +196,23 @@ function isPointAt(pos){
 
 // Sets the enabled/disabled state of the undo and redo buttons.
 function setButtonStates() {
-	setEnabled('btnd-undo', actionIndex != 0);
-	setEnabled('btnd-redo', actionIndex < actions.length);
-	setEnabled('btnd-clear', points.length > 0);
-	setActive('btnd-del', delMode);
+	if (traceMode) {
+		setEnabled('btnd-undo', false);
+		setEnabled('btnd-redo', false);
+		setEnabled('btnd-clear', false);
+		setEnabled('btnd-save', false);
+		setEnabled('btnd-load', false);
+		setActive('btnd-del', false);
+		setEnabled('btnd-del', false);
+	} else {
+		setEnabled('btnd-undo', actionIndex != 0);
+		setEnabled('btnd-redo', actionIndex < actions.length);
+		setEnabled('btnd-clear', points.length > 0);
+		setEnabled('btnd-save', true);
+		setEnabled('btnd-load', true);
+		setEnabled('btnd-del', true);
+		setActive('btnd-del', delMode);
+	}
 }
 
 // Clears all points from the canvas.
@@ -211,6 +244,8 @@ function canvasPosition(pos) {
 }
 
 function onMouseDown(pos) {
+	if (traceMode)
+		return;
 	if (!isPointAt(pos)) {
 		if (!delMode) {
 			var p = canvasPosition(pos);
@@ -226,7 +261,7 @@ function onMouseDown(pos) {
 }
 
 function onMouseUp(pos) {
-	if (!allow || delMode)
+	if (!allow || delMode || traceMode)
 		return;
 	var p = canvasPosition(pos);
 	perform({kind: 'move', i: index, x: p.x, y: p.y});
@@ -234,7 +269,7 @@ function onMouseUp(pos) {
 }
 
 function onMouseMove(pos) {
-	if (!allow || delMode)
+	if (!allow || delMode || traceMode)
 		return;
 	var p = canvasPosition(pos);
 	points[index].x = p.x;
@@ -296,6 +331,11 @@ function loadCanvas() {
 // Toggles the path tracing mode. In trace mode, the robot's position is shown
 // on the screen so that the user can track its progress (instead of editing).
 function toggleTrace() {
-	traceMode = !traceMode;
-	setActive('btnd-trace', traceMode);
+	if (!traceMode && !running) {
+		alert("The program is not running.");
+	} else {
+		traceMode = !traceMode;
+		setActive('btnd-trace', traceMode);
+		render();
+	}
 }

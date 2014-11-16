@@ -14,6 +14,7 @@ from scribbler.controller import Controller
 
 # Response statuses.
 STATUS_200 = '200 OK'
+STATUS_204 = '204 NO CONTENT'
 STATUS_404 = '404 NOT FOUND'
 
 # MIME types for file extensions.
@@ -90,9 +91,13 @@ class Server(object):
     def handle_post(self, data, start_response):
         """Handles a POST request, which is used for AJAX communication."""
         msg = self.controller(data)
+        if msg == None:
+            head = headers(get_mime(), 0)
+            start_response(STATUS_204, head)
+            return [None]
         head = headers(get_mime(), len(msg))
         start_response(get_status(), head)
-        yield msg
+        return [msg]
 
     def path(self, path_info):
         """Returns the relative path that should be followed for the request.

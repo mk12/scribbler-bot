@@ -5,7 +5,7 @@
 import json
 
 from gevent import Greenlet, sleep
-from gevent.queue import Queue
+from gevent.queue import Empty, Queue
 
 from scribbler.programs import avoider, tracie
 
@@ -22,9 +22,12 @@ PROGRAM_PREFIX = 'program:'
 # Amount of time to sleep between main loop iterations (seconds).
 LOOP_DELAY = 0.01
 
-# Timeout for status queue long-polling (seconds). This should match
-# `ajaxTimeout` in `controls.js`.
-STATUS_POLL_TIMEOUT = 30
+# Timeout for status queue long-polling (seconds). This should be slightly
+# larger than `ajaxTimeout` in `controls.js`, so that the client times out just
+# before the server gives up. (Alternatively, we could do it the other way
+# around, so that the client receives the empty, non-200 response just before it
+# is about to give up. I don't think either option has any advantages.)
+STATUS_POLL_TIMEOUT = 31
 
 
 class Controller(object):
@@ -86,7 +89,10 @@ class Controller(object):
         if command == 'short:param-help':
             return json.dumps(self.program.codes)
         if command == 'long:status':
-            return self.messages.get(timeout=STATUS_POLL_TIMEOUT)
+            try:
+                return self.messages.get(timeout=STATUS_POLL_TIMEOUT)
+            except Empty:
+                return None
         if command.startswith(PROGRAM_PREFIX):
             prog = command[len(PROGRAM_PREFIX):]
             self.switch_program(prog)

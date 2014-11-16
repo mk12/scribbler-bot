@@ -140,6 +140,8 @@ function send(message) {
 	post(message, function(text) {
 		addToConsole(text);
 		synchronize();
+	}, function(sn) {
+		addToConsole(message + " failed (" + String(sn) + ")");
 	}, function() {
 		addToConsole(message + " timed out");
 	});
@@ -152,9 +154,7 @@ function updateStatus() {
 	post('long:status', function(text) {
 		addToConsole(text);
 		updateStatus();
-	}, function() {
-		updateStatus();
-	});
+	}, updateStatus, updateStatus);
 }
 
 // Synchronizes the client state with the server.
@@ -173,18 +173,26 @@ function synchronize() {
 		if (traceMode && !running) {
 			toggleTrace();
 		}
+	}, function(sn) {
+		addToConsole("sync failed (" + String(sn) + ")");
 	}, function() {
 		addToConsole("sync timed out");
 	})
 }
 
 // Sends data to the server via a POST request. Calls the onreceive function
-// with the response text as the argument when the request is completed.
-function post(data, onreceive, ontimeout) {
+// with the response text as the argument when the request is completed. Calls
+// the onfail function with the response status if it is not 200 OK. Calls the
+// ontimeout function if the request times out.
+function post(data, onreceive, onfail, ontimeout) {
 	var r = new XMLHttpRequest();
 	r.onreadystatechange = function() {
-		if (r.readyState == 4 && r.status == 200) {
-			onreceive(r.responseText);
+		if (r.readyState == 4) {
+			if (r.status == 200) {
+				onreceive(r.responseText);
+			} else {
+				onfail(r.status);
+			}
 		}
 	};
 	r.open('POST', '/', true);
@@ -222,7 +230,7 @@ function switchToView(view) {
 			if (!traceMode) {
 				if (enoughPoints()) {
 					tracePoints = deepCopy(points);
-					send(JSON.stringify(convertPoints()));
+					send('points:' + JSON.stringify(convertPoints()));
 				} else {
 					addToConsole("not enough points");
 				}
@@ -246,6 +254,8 @@ function generateParamHelp() {
 			return '<div><dt>' + sc + '</dt><dd>' + codes[sc] + '</dd></div>';
 		}).join('');
 		document.getElementById('pdefinitions').innerHTML = html;
+	}, function(sn) {
+		addToConsole("help fetch failed (" + String(sn) + ")");
 	}, function() {
 		addToConsole("help fetch timed out");
 	});

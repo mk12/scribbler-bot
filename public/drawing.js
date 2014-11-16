@@ -94,6 +94,12 @@ function convertPoints() {
 	});
 }
 
+// Sends the points to the server.
+function sendPoints() {
+	tracePoints = deepCopy(points);
+	send('points:' + JSON.stringify(convertPoints()));
+}
+
 // Adds an action to action array to keep track of user's input.
 function addAction(a) {
 	// To forget about undone actions when a new action is performed.

@@ -17,13 +17,14 @@ PARAM_CODES = {
     'mr': 'min_rotation'
 }
 
-
 # Default values for the parameters of the program.
 PARAM_DEFAULTS = {
     'rotation_speed': 0.4, # from 0.0 to 1.0
     'point_scale': 0.05, # cm/px
     'min_rotation': 2 # deg
 }
+
+POINTS_PREFIX = 'points:'
 
 
 class Tracie(ModeProgram):
@@ -53,8 +54,9 @@ class Tracie(ModeProgram):
         p_status = ModeProgram.__call__(self, command)
         if p_status:
             return p_status
-        if command.startswith('['):
-            self.new_points = self.transform_points(json.loads(command))
+        if command.startswith(POINTS_PREFIX):
+            json_str = command[len(POINTS_PREFIX):]
+            self.new_points = self.transform_points(json.loads(json_str))
             return "received {} points".format(str(len(self.new_points)))
         return None
 

@@ -6,6 +6,9 @@ var syncInterval = 10000;
 // Timeout for AJAX requests (ms).
 var ajaxTimeout = 30000;
 
+// Functon to call on the next sync.
+var nextSyncFn = null;
+
 // Keep track of lines in the console.
 var consoleLines = 0;
 var scrolling = true;
@@ -85,6 +88,9 @@ function switchProgram(name) {
 	setStartStop(true);
 	setEnabled('btnc-reset', false);
 	setVisible('btnc-draw', name == 'tracie');
+	if (name == 'tracie' && enoughPoints()) {
+		nextSyncFn = sendPoints;
+	}
 	send('program:' + name);
 	currentProgram = name;
 }
@@ -173,6 +179,10 @@ function synchronize() {
 		if (traceMode && !running) {
 			toggleTrace();
 		}
+		if (nextSyncFn) {
+			nextSyncFn();
+			nextSyncFn = null;
+		}
 	}, function(sn) {
 		addToConsole("sync failed (" + String(sn) + ")");
 	}, function() {
@@ -229,11 +239,10 @@ function switchToView(view) {
 	if (view == 'controls') {
 		if (currentView == 'drawing') {
 			removeEventListeners();
-			// Don't send the points if it's tracing.
-			if (!traceMode) {
+			// Don't send the points if it's tracing or running.
+			if (!running && !traceMode) {
 				if (enoughPoints()) {
-					tracePoints = deepCopy(points);
-					send('points:' + JSON.stringify(convertPoints()));
+					sendPoints();
 				} else {
 					addToConsole("not enough points");
 				}

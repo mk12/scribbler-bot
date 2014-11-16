@@ -58,7 +58,23 @@ class Tracie(ModeProgram):
             json_str = command[len(POINTS_PREFIX):]
             self.new_points = self.transform_points(json.loads(json_str))
             return "received {} points".format(str(len(self.new_points)))
-        return None
+        if command == 'short:trace':
+            if self.mode == 0:
+                return "0 {}".format(self.heading)
+            if self.mode == 'halt':
+                return "{} {}".format(len(self.points)-1, self.heading)
+            t = self.mode_time()
+            T = self.go_for
+            i = self.index - 1
+            delta_i = 1
+            theta = self.heading
+            delta_theta = 0
+            if self.mode == 'rotate':
+                delta_i = 0
+                delta_theta = self.delta_angle
+                theta -= delta_theta
+            vals = [t, T, i, delta_i, theta, delta_theta]
+            return ' '.join(map(str, vals));
 
     def transform_points(self, data):
         """Parses the point data and translates all points to make the firs
@@ -94,6 +110,8 @@ class Tracie(ModeProgram):
             self.index += 1
             if self.index < len(self.points):
                 self.set_rotate_time()
+                # Don't even try to rotate if it's a very small angle, because
+                # the robot will go too far; it is better to go straight.
                 min_rad = deg_to_rad(self.params['min_rotation'])
                 if abs(self.delta_angle) < min_rad:
                     self.set_drive_time()
@@ -127,7 +145,7 @@ class Tracie(ModeProgram):
     def next_point_angle(self):
         """Calculates the angle that the line connecting the current point and
         the next point makes in standard position."""
-        x1, y1 = self.points[self.index -1]
+        x1, y1 = self.points[self.index-1]
         x2, y2 = self.points[self.index]
         return math.atan2(y2 - y1, x2 - x1)
 

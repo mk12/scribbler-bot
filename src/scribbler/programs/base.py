@@ -15,7 +15,6 @@ PARAM_CODES = {
     'att': 'angle_to_time'
 }
 
-
 # Default values for the parameters of the program.
 PARAM_DEFAULTS = {
     'beep_len': 0.5, # s
@@ -24,7 +23,6 @@ PARAM_DEFAULTS = {
     'dist_to_time': 0.07, # cm/s
     'angle_to_time': 0.009 # rad/s
 }
-
 
 # Prefix used in commands that change the value of a parameter.
 PARAM_PREFIX = 'set:'
@@ -102,7 +100,6 @@ class BaseProgram(object):
             # Set the parameter to the new value.
             self.params[name] = n
             return name + " = " + str(n)
-        return None
 
     def start(self):
         """Called when the controller is started."""

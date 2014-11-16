@@ -10,8 +10,25 @@ var canvas, context;
 var index;
 var allow = false;
 var delMode = false;
+
 var traceMode = false;
 var tracePoints = [];
+var traceIndex = 0;
+var traceTheta = 0;
+var traceDeltaTheta = 0;
+var traceInitial = 0.0;
+var tracePeriod = 0.0;
+var traceUpdateInterval = 20;
+var traceIntervalID = 0;
+var traceSyncTime = 0.99;
+var traceInterpolate = false;
+
+var arrowLen = 30;
+var arrowTipAngle = 0.35;
+var arrowTipLen = 10;
+var arrowLineWidth = 2;
+
+var sendPointsWaitTime = 200;
 
 // Sets up the canvas and context global variables.
 function setupCanvas() {
@@ -58,7 +75,7 @@ function removeEventListeners() {
 function deepCopy(ps) {
 	copy = [];
 	for (var i = 0, len = ps.length; i < len; i++) {
-		copy[i] = {x: ps[i].x, y: ps[i].y};
+		copy.push({x: ps[i].x, y: ps[i].y});
 	}
 	return copy;
 }
@@ -147,24 +164,25 @@ function generatePoints() {
 	}
 }
 
-// Draws a dot centred at p, optionally filled with red (otherwise black).
-function drawDot(p, fillRed) {
-	context.fillStyle = fillRed? 'red' : 'black';
+// Draws a dot centred at `p` filled with the given colour.
+function drawDot(p, colour) {
+	context.fillStyle = colour;
 	context.beginPath();
 	context.arc(p.x, p.y, radius, 0, Math.PI * 2);
 	context.fill();
 }
 
-// Connecting two given points.
+// Draws a line connecting the two points.
 function drawLine(p1, p2) {
 	context.beginPath();
 	context.moveTo(p1.x, p1.y)
 	context.lineTo(p2.x, p2.y);
 	context.strokeStyle = 'black';
+	context.lineWidth = 1;
 	context.stroke();
 }
 
-// Draws an object on a canvas.
+// Draws all the points on the canvas.
 function draw() {
 	if (traceMode) {
 		context.fillStyle = '#eee';
@@ -177,7 +195,10 @@ function draw() {
 		if (i < p.length - 1) {
 			drawLine(p[i], p[i+1]);
 		}
-		drawDot(p[i], i == 0);
+		drawDot(p[i], (i == 0) ? 'red' : 'black');
+	}
+	if (traceMode) {
+		drawTrace();
 	}
 }
 
@@ -334,14 +355,130 @@ function loadCanvas() {
 	}
 }
 
+// Gets the current time in milliseconds.
+function getTime() {
+	return (new Date).getTime();
+}
+
 // Toggles the path tracing mode. In trace mode, the robot's position is shown
 // on the screen so that the user can track its progress (instead of editing).
 function toggleTrace() {
 	if (!traceMode && !running) {
-		alert("The program is not running.");
+		if (enoughPoints()) {
+			sendPoints();
+			setTimeout(function() {
+				toggleStartStop();
+				restOfToggleTrace();
+			}, sendPointsWaitTime);
+		} else {
+			alert("There are not enough points.");
+		}
 	} else {
-		traceMode = !traceMode;
-		setActive('btnd-trace', traceMode);
-		render();
+		restOfToggleTrace();
 	}
+}
+
+function restOfToggleTrace() {
+	traceMode = !traceMode;
+	setActive('btnd-trace', traceMode);
+	if (traceMode) {
+		traceStart();
+	} else {
+		traceStop();
+	}
+	setButtonStates();
+}
+
+// Draws an arrow from a point in a direction with a colour.
+function drawArrow(p, theta, colour) {
+	var tipX = p.x + arrowLen * Math.cos(theta);
+	var tipY = p.y - arrowLen * Math.sin(theta);
+	var aX = tipX - arrowTipLen * Math.cos(theta + arrowTipAngle);
+	var aY = tipY + arrowTipLen * Math.sin(theta + arrowTipAngle);
+	var bX = tipX - arrowTipLen * Math.cos(theta - arrowTipAngle);
+	var bY = tipY + arrowTipLen * Math.sin(theta - arrowTipAngle);
+	context.moveTo(p.x, p.y);
+	context.lineTo(tipX, tipY);
+	context.moveTo(aX, aY);
+	context.lineTo(tipX, tipY);
+	context.lineTo(bX, bY);
+	context.strokeStyle = colour;
+	context.lineWidth = arrowLineWidth;
+	context.stroke();
+}
+
+// Gets the trace T value, a number between 0 and 1 representing how far along
+// it is in the current drive/rotation.
+function getTraceT() {
+	return (getTime() - traceInitial) / tracePeriod;
+}
+
+// Draws a dot and arrow representing the robot's position and direction.
+function drawTrace() {
+	var pos = tracePoints[traceIndex];
+	var theta = traceTheta;
+	var t = getTraceT();
+	if (traceInterpolate == 'drive') {
+		var p2 = tracePoints[traceIndex+1];
+		pos = {
+			x: pos.x + t * (p2.x - pos.x),
+			y: pos.y + t * (p2.y - pos.y)
+		};
+	} else if (traceInterpolate == 'rotate') {
+		theta = traceTheta + t * traceDeltaTheta;
+	}
+	drawDot(pos, 'blue');
+	drawArrow(pos, theta, 'blue');
+}
+
+function traceStart() {
+	syncTrace(function() {
+		traceIntervalID = setInterval(function() {
+			updateTrace();
+			if (currentView == 'drawing') {
+				draw();
+			}
+		}, traceUpdateInterval);
+	});
+}
+
+function traceStop() {
+	clearInterval(traceIntervalID);
+	render();
+	traceInitial = 0;
+}
+
+// Advances the simulation of the robot's position by updating the values of the
+// tracing variables.
+function updateTrace() {
+	var t = getTraceT();
+	if (traceInitial == 0 || (traceInterpolate && t > traceSyncTime)) {
+		syncTrace();
+	}
+}
+
+function syncTrace(after) {
+	post('short:trace', function(text) {
+		var vals = text.split(' ');
+		if (vals.length == 2) {
+			traceIndex = parseInt(vals[0]);
+			traceTheta = parseFloat(vals[1]);
+			traceInterpolate = false;
+		} else {
+			traceInitial = getTime() - parseFloat(vals[0]) * 1000;
+			tracePeriod = parseFloat(vals[1]) * 1000;
+			traceIndex = parseInt(vals[2]);
+			var delta_i = parseInt(vals[3]);
+			traceTheta = parseFloat(vals[4]);
+			traceDeltaTheta = parseFloat(vals[5]);
+			traceInterpolate = (delta_i == 1) ? 'drive' : 'rotate';
+		}
+		if (after) {
+			after();
+		}
+	}, function(sn) {
+		addToConsole("trace sync failed (" + String(sn) + ")");
+	}, function() {
+		addToConsole("trace sync timed out");
+	});
 }

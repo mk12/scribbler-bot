@@ -19,7 +19,6 @@ PARAM_CODES = {
     'rf': 'return_factor'
 }
 
-
 # Default values for the parameters of the program.
 PARAM_DEFAULTS = {
     'obstacle_slowdown': 0.2,
@@ -32,7 +31,6 @@ PARAM_DEFAULTS = {
     'bias': 0, # from -1 to 1
     'return_factor': 0.75
 }
-
 
 # Statuses to be displayed at the beginning of each mode.
 STATUSES = {

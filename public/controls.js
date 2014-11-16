@@ -22,10 +22,16 @@ function addToConsole(text) {
 		console.innerHTML += '\n';
 	}
 	console.innerHTML += " [" + consoleLines + "] " + text;
+	scrollConsole();
+	consoleLines++;
+}
+
+// Scrolls the console down to the bottom line if scrolling is enabled.
+function scrollConsole() {
 	if (scrolling) {
+		var console = document.getElementById('console');
 		console.scrollTop = console.scrollHeight;
 	}
-	consoleLines++;
 }
 
 // Clears the console and resets the counter.
@@ -111,6 +117,15 @@ function setStartStop(start) {
 // Tells the server to start/stop the program. Changes the text of the button
 // and enables/disables the reset button accordingly.
 function btnStartStop() {
+	toggleStartStop();
+	if (running) {
+		traceStop();
+	} else {
+		traceStart();
+	}
+}
+
+function toggleStartStop() {
 	if (running) {
 		setStartStop(true);
 		running = false;
@@ -255,6 +270,7 @@ function switchToView(view) {
 	}
 	showView(view);
 	currentView = view;
+	scrollConsole();
 }
 
 // Generates the help information for the current program and inserts the HTML

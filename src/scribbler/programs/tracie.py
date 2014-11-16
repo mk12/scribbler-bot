@@ -59,12 +59,11 @@ class Tracie(ModeProgram):
         return None
 
     def transform_points(self, data):
-        """Transforms the point data by translating to make the first point the
-        origin and scaling by the appropriate parameter."""
+        """Parses the point data and translates all points to make the firs
+        point the origin. Returns the resulting points list."""
         x0 = float(data[0]['x'])
         y0 = float(data[0]['y'])
-        k = self.params['point_scale']
-        return [(k*(float(p['x']) - x0), k*(float(p['y']) - y0)) for p in data]
+        return [(float(p['x']) - x0, float(p['y']) - y0) for p in data]
 
     @property
     def speed(self):
@@ -107,7 +106,9 @@ class Tracie(ModeProgram):
         get to the next point."""
         x1, y1 = self.points[self.index -1]
         x2, y2 = self.points[self.index]
-        distance = dist_2d(x1, y1, x2, y2)
+        # Scale by the point_sacle now, rather than in the transform method,
+        # because the user can change this value at any time.
+        distance = self.params['point_scale'] * dist_2d(x1, y1, x2, y2)
         self.go_for = self.dist_to_time(distance)
         self.delta_pos = distance
 

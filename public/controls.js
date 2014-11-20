@@ -76,7 +76,9 @@ var allPrograms = ['avoid', 'tracie'];
 
 // Disables the specified program button and enables the rest.
 function enableOtherPrograms(name) {
-	setEnabled('btnc-' + name, false);
+	if (name != 'calib') {
+		setEnabled('btnc-' + name, false);
+	}
 	for (var i = 0, len = allPrograms.length; i < len; i++) {
 		if (allPrograms[i] != name) {
 			setEnabled('btnc-' + allPrograms[i], true);
@@ -99,6 +101,15 @@ function switchProgram(name) {
 	}
 	send('program:' + name);
 	currentProgram = name;
+}
+
+// Either switches to the calibration program or displays the `att` value.
+function btnCalib() {
+	if (currentProgram != 'calib') {
+		switchProgram('calib');
+	} else {
+		send('short:att');
+	}
 }
 
 // Keep track of the state of program execution.

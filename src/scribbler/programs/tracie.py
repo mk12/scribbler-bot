@@ -19,8 +19,10 @@ PARAM_CODES = {
 
 # Default values for the parameters of the program.
 PARAM_DEFAULTS = {
-    'rotation_speed': 0.4, # from 0.0 to 1.0
-    'point_scale': 0.05, # cm/px
+    'speed': 0.1,
+    'angle_to_time': 0.0052,
+    'rotation_speed': 0.1, # 0.4, # from 0.0 to 1.0
+    'point_scale': 0.02, #0.05, # cm/px
     'min_rotation': 2 # deg
 }
 
@@ -85,7 +87,9 @@ class Tracie(ModeProgram):
 
     @property
     def speed(self):
-        if self.mode == 'rotate':
+        # This looks wrong, but the speed is actually used just before the mode
+        # switch, so it needs to be this way.
+        if self.mode == 'drive':
             return self.params['rotation_speed']
         return self.params['speed']
 

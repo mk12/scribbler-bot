@@ -418,6 +418,7 @@ function drawTrace() {
 	var pos = tracePoints[traceIndex];
 	var theta = traceTheta;
 	var t = getTraceT();
+	if (t > 1) t = 1;
 	if (traceInterpolate == 'drive') {
 		var p2 = tracePoints[traceIndex+1];
 		pos = {

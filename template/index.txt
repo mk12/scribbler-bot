@@ -31,7 +31,7 @@ Scribbler Bot | Team 22
 		<section>
 			<label>Params</label>
 			<a id="btnc-help" onclick="switchToView('param-help');">Help</a>
-			<a id="btnc-calib" onclick="">Calib</a>
+			<a id="btnc-calib" onclick="btnCalib();">Calib</a>
 		</section>
 		<form onsubmit="setParameter(); return false;">
 			<label>Value</label>

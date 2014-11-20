@@ -7,11 +7,15 @@ import json
 from gevent import Greenlet, sleep
 from gevent.queue import Empty, Queue
 
-from scribbler.programs import avoider, tracie
+from scribbler.programs import avoider, calib, tracie
 
 
 # Map program IDs to their respective classes or functions.
-PROGRAMS = {'avoid': avoider.Avoider, 'tracie': tracie.Tracie}
+PROGRAMS = {
+    'avoid': avoider.Avoider,
+    'calib': calib.Calib,
+    'tracie': tracie.Tracie
+}
 
 # This is the program that is initially active.
 DEFAULT_PROGRAM = 'tracie'
